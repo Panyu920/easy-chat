@@ -1,0 +1,5 @@
+include:
+  - './deploy/docker_compose/etcd.yaml'
+  - './deploy/docker_compose/redis.yaml'
+  - './deploy/docker_compose/mysql.yaml'
+  - './deploy/docker_compose/common.yaml'

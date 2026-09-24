@@ -1,0 +1,3 @@
+networks:
+  easy-chat:
+    driver: bridge

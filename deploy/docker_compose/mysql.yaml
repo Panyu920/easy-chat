@@ -1,0 +1,14 @@
+services:
+    mysql:
+      image: mysql:8.0
+      ports:
+        - 13306:3306 # 宿主机端口:容器端口
+      container_name: mysql
+      volumes:
+        - ./components/mysql/data:/var/lib/mysql
+        - /etc/localtime:/etc/localtime
+      environment:
+        MYSQL_ROOT_PASSWORD: easy-chat # 数据库密码
+      restart: always
+      networks:
+        easy-chat:

@@ -12,8 +12,8 @@ RUN apk update && \
     echo "Asia/Shanghai" > /etc/timezone
 ENV TZ=Asia/Shanghai
 
-ENV RUN_BIN = bin/${SERVER_NAME}-${SERVER_TYPE}
-ENV RUN_CONF = /${SERVER_NAME}/conf/${SERVER_TYPE}.yaml
+ENV RUN_BIN=bin/${SERVER_NAME}-${SERVER_TYPE}
+ENV RUN_CONF=/${SERVER_NAME}/conf/${SERVER_TYPE}.yaml
 
 # 创建服务目录
 RUN mkdir /${SERVER_NAME} && \
@@ -26,10 +26,10 @@ COPY ./bin/${SERVER_NAME}-${SERVER_TYPE} /${SERVER_NAME}/bin/
 RUN chmod +rx /${SERVER_NAME}/bin/${SERVER_NAME}-${SERVER_TYPE}
 
 # 复制配置文件 xxx.yaml（从宿主机复制到容器）
-COPY ./apps/${SERVER_NAME}/${SERVER_TYPE}/etc/dev/${SERVER_NAME}.yaml /${SERVER_NAME}/conf/
+COPY ./apps/${SERVER_NAME}/${SERVER_TYPE}/etc/dev/${SERVER_TYPE}.yaml /${SERVER_NAME}/conf/
 
 # 自动进入服务目录
 WORKDIR /${SERVER_NAME}
 
 # 启动服务
-ENTRYPOINT ["${RUN_BIN}" "-f" "${RUN_CONF}"]
+ENTRYPOINT ["sh", "-c", "exec ${RUN_BIN} -f ${RUN_CONF}"]

@@ -1,0 +1,16 @@
+services:
+  redis:
+    image: redis:8.10.1-alpine
+    ports:
+      - 16379:6379 # 宿主机端口:容器端口
+    container_name: redis
+    volumes:
+      - ./components/redis/data:/data
+      - ./components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+    environment:
+      TZ: Asia/Shanghai
+    restart: unless-stopped
+    networks:
+      easy-chat:
+    command: redis-server --requirepass easy-chat --appendonly yes
+
