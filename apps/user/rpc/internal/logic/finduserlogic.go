@@ -1,0 +1,31 @@
+package logic
+
+import (
+	"context"
+
+	"easy-chat/apps/user/rpc/internal/svc"
+	"easy-chat/apps/user/rpc/pb/user"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type FindUserLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logx.Logger
+}
+
+func NewFindUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FindUserLogic {
+	return &FindUserLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		Logger: logx.WithContext(ctx),
+	}
+}
+
+// FindUser is the RPC method that finds a user.
+func (l *FindUserLogic) FindUser(in *user.FindUserRequest) (*user.FindUserResponse, error) {
+	// todo: add your logic here and delete this line
+
+	return &user.FindUserResponse{}, nil
+}

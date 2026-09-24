@@ -1,0 +1,1 @@
+goctl rpc  protoc ./apps/user/rpc/proto/user.proto --go_out=./apps/user/rpc/pb --go-grpc_out=./apps/user/rpc/pb --zrpc_out=./apps/user/rpc

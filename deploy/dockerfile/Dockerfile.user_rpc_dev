@@ -1,0 +1,35 @@
+FROM alpine:3.24.2
+
+# 服务名称
+ARG SERVER_NAME=user
+# 服务类型
+ARG SERVER_TYPE=rpc
+
+# 安装时区数据
+RUN apk update && \
+    apk --no-cache add tzdata && \
+    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
+ENV TZ=Asia/Shanghai
+
+ENV RUN_BIN = bin/${SERVER_NAME}-${SERVER_TYPE}
+ENV RUN_CONF = /${SERVER_NAME}/conf/${SERVER_TYPE}.yaml
+
+# 创建服务目录
+RUN mkdir /${SERVER_NAME} && \
+    mkdir /${SERVER_NAME}/conf && \
+    mkdir /${SERVER_NAME}/bin
+
+# 复制服务二进制文件
+COPY ./bin/${SERVER_NAME}-${SERVER_TYPE} /${SERVER_NAME}/bin/
+# 添加可执行权限
+RUN chmod +rx /${SERVER_NAME}/bin/${SERVER_NAME}-${SERVER_TYPE}
+
+# 复制配置文件 xxx.yaml（从宿主机复制到容器）
+COPY ./apps/${SERVER_NAME}/${SERVER_TYPE}/etc/dev/${SERVER_NAME}.yaml /${SERVER_NAME}/conf/
+
+# 自动进入服务目录
+WORKDIR /${SERVER_NAME}
+
+# 启动服务
+ENTRYPOINT ["${RUN_BIN}" "-f" "${RUN_CONF}"]
