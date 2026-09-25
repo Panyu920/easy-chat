@@ -27,3 +27,6 @@ db_migrate_down:
 	@make -f ./deploy/mk/db.mk migrate_down
 db_sqlc:
 	@make -f ./deploy/mk/db.mk sqlc
+
+run_user_rpc:
+	@make -f ./deploy/mk/user_rpc.mk run-test

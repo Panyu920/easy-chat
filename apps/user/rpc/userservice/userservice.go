@@ -7,7 +7,7 @@ package userservice
 import (
 	"context"
 
-	"easy-chat/apps/user/rpc/pb/user"
+	"easy-chat/apps/user/rpc/user"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

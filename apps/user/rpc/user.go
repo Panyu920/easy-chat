@@ -7,7 +7,7 @@ import (
 	"easy-chat/apps/user/rpc/internal/config"
 	"easy-chat/apps/user/rpc/internal/server"
 	"easy-chat/apps/user/rpc/internal/svc"
-	"easy-chat/apps/user/rpc/pb/user"
+	"easy-chat/apps/user/rpc/user"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"

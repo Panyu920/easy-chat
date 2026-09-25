@@ -14,6 +14,8 @@ VERSION_TEST=$(VERSION)
 # 编译的程序名称（本地镜像名称）
 APP_NAME_TEST=easy-im-${SERVER_NAME}-${SERVER_TYPE}-test
 
+CONF_PATH=./apps/${SERVER_NAME}/${SERVER_TYPE}/etc/dev/${SERVER_TYPE}.yaml
+
 # 测试下的编译文件（Dockerfile 路径）
 DOCKER_FILE_TEST=./deploy/dockerfile/Dockerfile.${SERVER_NAME}_${SERVER_TYPE}_dev
 
@@ -49,3 +51,7 @@ publish-test:
 
 # 串联多个步骤
 release-test: build-test tag-test publish-test
+
+run-test:
+	@echo 'run test ${APP_NAME_TEST}'
+	go run ./apps/${SERVER_NAME}/${SERVER_TYPE}/${SERVER_NAME}.go -f ${CONF_PATH}

@@ -4,3 +4,20 @@ Etcd:
   Hosts:
   - 192.168.1.5:3379
   Key: user.rpc
+
+Mysql:
+  DSN: root:easy-chat@tcp(192.168.1.5:13306)/easy_chat?charset=utf8mb4&parseTime=True&loc=Local
+
+Redisx:
+  Host: 192.168.1.5:16379
+  Type: node
+  Pass: easy-chat
+
+Cache:
+  - Host: 192.168.1.5:16379
+    Type: node
+    Pass: easy-chat
+
+Jwt:
+  AccessSecret: easy-chat
+  AccessExpire: 86400
