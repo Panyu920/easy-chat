@@ -11,3 +11,19 @@ user-rpc-dev:
 
 release-dev:
 	chmod 777 ./components -R && cd ./deploy/script && chmod +x release_dev.sh && ./release_dev.sh
+
+
+db_schema:
+	dbml2sql  ./doc/schema.dbml -o ./doc/schema.sql  --mysql
+
+db_create:
+	@make -f ./deploy/mk/db.mk create_db
+
+db_new_migration:
+	@make -f ./deploy/mk/db.mk new_migration
+db_migrate_up:
+	@make -f ./deploy/mk/db.mk migrate_up
+db_migrate_down:
+	@make -f ./deploy/mk/db.mk migrate_down
+db_sqlc:
+	@make -f ./deploy/mk/db.mk sqlc

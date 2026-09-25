@@ -1,0 +1,29 @@
+Project easy_chat {
+    database_type: 'mysql'
+    Note: '数据库设计文件'
+    database_name: 'easy_chat'
+    version: '1.0'
+    default_engine: 'InnoDB'
+    default_charset: 'utf8mb4'
+}
+
+
+
+Table users as U {
+    id varchar(24) [pk, not null,  note: '用户ID']
+    avatar varchar(255) [note: '用户头像']
+    nickname varchar(25) [not null, note: '用户名']
+    password varchar(191) [not null, note: '密码']
+    create_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '创建时间']
+    update_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '更新时间']
+    last_login_at timestamp [note: '最后登录时间']
+    phone varchar(128) [not null, unique, note: '手机号']
+    phone_verified bool [not null, default: 0,note: '手机号是否验证']
+    status tinyint [not null, default: 0,note: '用户状态(0: 正常,1:禁用, 2: 删除)']
+    sex tinyint [not null, default: 0,note: '性别(0: 男,1: 女)']
+
+    indexes {
+        nickname [name: 'idx_nickname']
+        phone [unique, name: 'idx_phone']
+    }
+}

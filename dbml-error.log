@@ -1,0 +1,5 @@
+2026-09-25T01:35:07.702Z
+
+    schema.dbml(1,9): A Project's name is optional or must be an identifier or a quoted identifer
+    schema.dbml(13,8): Invalid column type
+
