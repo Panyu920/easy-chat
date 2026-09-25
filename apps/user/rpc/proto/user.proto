@@ -39,7 +39,7 @@ message LoginRequest {
 
 message LoginResponse {
   string token      = 1;
-  uint32 expired_at = 2;
+  uint64 expired_at = 2;
 }
 
 message GetUserInfoRequest {

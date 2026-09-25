@@ -368,7 +368,7 @@ func (x *LoginRequest) GetPassword() string {
 type LoginResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	ExpiredAt     uint32                 `protobuf:"varint,2,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
+	ExpiredAt     uint64                 `protobuf:"varint,2,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -410,7 +410,7 @@ func (x *LoginResponse) GetToken() string {
 	return ""
 }
 
-func (x *LoginResponse) GetExpiredAt() uint32 {
+func (x *LoginResponse) GetExpiredAt() uint64 {
 	if x != nil {
 		return x.ExpiredAt
 	}
@@ -639,7 +639,7 @@ const file_apps_user_rpc_proto_user_proto_rawDesc = "" +
 	"\rLoginResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1d\n" +
 	"\n" +
-	"expired_at\x18\x02 \x01(\rR\texpiredAt\"$\n" +
+	"expired_at\x18\x02 \x01(\x04R\texpiredAt\"$\n" +
 	"\x12GetUserInfoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"5\n" +
 	"\x13GetUserInfoResponse\x12\x1e\n" +

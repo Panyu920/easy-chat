@@ -16,9 +16,12 @@ func GneratePasswordHash(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%x", pwd), nil
+	return string(pwd), nil
 }
 
-func ValidatePasswordHash(hash, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+func ValidatePasswordHash(hash, password string) bool {
+	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)); err != nil {
+		return false
+	}
+	return true
 }
