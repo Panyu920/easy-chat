@@ -2,13 +2,18 @@ package logic
 
 import (
 	"context"
-	"errors"
+	"github.com/pkg/errors"
 
 	"easy-chat/apps/user/models"
 	"easy-chat/apps/user/rpc/internal/svc"
 	"easy-chat/apps/user/rpc/user"
+	"easy-chat/pkg/xerr"
 
 	"github.com/zeromicro/go-zero/core/logx"
+)
+
+var (
+	ErrUserNotFound = xerr.New(xerr.REQUEST_PARAM_ERROR, "用户不存在")
 )
 
 type FindUserLogic struct {
@@ -45,26 +50,26 @@ func (l *FindUserLogic) FindUser(in *user.FindUserRequest) (*user.FindUserRespon
 		res, err := l.svcCtx.UsersModel.FindOneByPhone(l.ctx, in.Phone)
 		if err != nil {
 			if err == models.ErrNotFound {
-				return nil, errors.New("用户不存在")
+				return nil, errors.WithStack(ErrUserNotFound)
 			}
-			return nil, err
+			return nil, errors.Wrapf(xerr.NewDBError(), "查询用户失败: %v, by phone: %s", err, in.Phone)
 		}
 		users = append(users, *res)
 	} else if in.Nickname != "" {
 		users, err = l.svcCtx.UsersModel.ListByNickname(l.ctx, in.Nickname)
 		if err != nil {
 			if err == models.ErrNotFound {
-				return nil, errors.New("用户不存在")
+				return nil, errors.WithStack(ErrUserNotFound)
 			}
-			return nil, err
+			return nil, errors.Wrapf(xerr.NewDBError(), "查询用户失败: %v, by nickname: %s", err, in.Nickname)
 		}
 	} else if len(in.Ids) > 0 {
 		users, err = l.svcCtx.UsersModel.ListByIds(l.ctx, in.Ids)
 		if err != nil {
 			if err == models.ErrNotFound {
-				return nil, errors.New("用户不存在")
+				return nil, errors.WithStack(ErrUserNotFound)
 			}
-			return nil, err
+			return nil, errors.Wrapf(xerr.NewDBError(), "查询用户失败: %v, by ids: %v", err, in.Ids)
 		}
 	}
 

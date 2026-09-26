@@ -2,11 +2,13 @@ package logic
 
 import (
 	"context"
-	"errors"
+
+	"github.com/pkg/errors"
 
 	"easy-chat/apps/user/models"
 	"easy-chat/apps/user/rpc/internal/svc"
 	"easy-chat/apps/user/rpc/user"
+	"easy-chat/pkg/xerr"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,9 +33,9 @@ func (l *GetUserInfoLogic) GetUserInfo(in *user.GetUserInfoRequest) (*user.GetUs
 	userInfo, err := l.svcCtx.UsersModel.FindOne(l.ctx, in.Id)
 	if err != nil {
 		if err == models.ErrNotFound {
-			return nil, errors.New("用户不存在")
+			return nil, errors.WithStack(ErrUserNotFound)
 		}
-		return nil, err
+		return nil, errors.Wrapf(xerr.NewDBError(), "查询用户失败: %v, by id: %s", err, in.Id)
 	}
 
 	return &user.GetUserInfoResponse{

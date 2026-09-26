@@ -8,14 +8,15 @@ import (
 	"easy-chat/apps/user/rpc/user"
 	"easy-chat/pkg/encrypt"
 	"easy-chat/pkg/wuid"
+	"easy-chat/pkg/xerr"
 
-	"errors"
+	"github.com/pkg/errors"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
 var (
-	ErrPhoneExist = errors.New("手机号已存在")
+	ErrPhoneExist = xerr.New(xerr.REQUEST_PARAM_ERROR, "手机号已存在")
 )
 
 type RegisterLogic struct {
@@ -40,19 +41,19 @@ func (l *RegisterLogic) Register(in *user.RegisterRequest) (*user.RegisterRespon
 	userInfo, err := l.svcCtx.UsersModel.FindOneByPhone(l.ctx, in.Phone)
 	// 错误
 	if err != nil && err != models.ErrNotFound {
-		return nil, err
+		return nil, errors.Wrapf(xerr.NewDBError(), "查询用户失败: %v, phone: %s", err, in.Phone)
 	}
 
 	// 手机号已存在
 	if userInfo != nil {
-		return nil, ErrPhoneExist
+		return nil, errors.WithStack(ErrPhoneExist)
 	}
 
 	// 2.注册用户
 	userId := wuid.GenerateUserID(l.svcCtx.Config.Mysql.DSN)
 	hashPassword, err := encrypt.GneratePasswordHash(in.Password)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(xerr.NewInternalError(), "加密密码失败: %v, password: %s", err, in.Password)
 	}
 	userParam := &models.Users{
 		Id:       userId,
@@ -64,7 +65,7 @@ func (l *RegisterLogic) Register(in *user.RegisterRequest) (*user.RegisterRespon
 	}
 	_, err = l.svcCtx.UsersModel.Insert(l.ctx, userParam)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(xerr.NewDBError(), "插入用户失败: %v, user id: %s", err, userId)
 	}
 	return &user.RegisterResponse{
 		Id: userId,
