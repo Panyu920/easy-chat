@@ -30,3 +30,6 @@ db_sqlc:
 
 run_user_rpc:
 	@make -f ./deploy/mk/user_rpc.mk run-test
+
+run_user_api:
+	@make -f ./deploy/mk/user_api.mk run-test

@@ -8,7 +8,10 @@ require (
 	google.golang.org/protobuf v1.36.12
 )
 
-require github.com/edwingeng/slog v0.0.0-20221027170832-482f0dfb6247 // indirect
+require (
+	github.com/edwingeng/slog v0.0.0-20221027170832-482f0dfb6247 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
+)
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect

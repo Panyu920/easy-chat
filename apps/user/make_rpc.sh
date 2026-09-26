@@ -1,3 +1,5 @@
-goctl rpc  protoc ./apps/user/rpc/proto/user.proto --go_out=./apps/user/rpc --go-grpc_out=./apps/user/rpc --zrpc_out=./apps/user/rpc
+goctl rpc  protoc ./apps/user/rpc/proto/user.proto --go_out=./apps/user/rpc --go-grpc_out=./apps/user/rpc --zrpc_out=./apps/user/rpc --client=true
 
 goctl model mysql ddl -src="./deploy/sql/user.sql" -dir="./apps/user/models/" -c
+
+goctl api go -api "./apps/user/api/user.api" -dir "./apps/user/api/" -style gozero
