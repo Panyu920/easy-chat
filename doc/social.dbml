@@ -1,0 +1,87 @@
+
+Table friends as F {
+    id bigint [pk, not null,  note: '关系ID',increment]
+    user_id varchar(24) [not null, note: '用户ID']
+    friend_id varchar(24) [not null,  note: '好友ID']
+    remark varchar(255) [note: '备注']
+    add_source tinyint [not null, default: 0,note: '添加好友来源(0: 好友请求,1: 好友添加)']
+    create_at timestamp [not null, default: `now()`,note: '创建时间']
+    update_at timestamp [not null, default: `now()`,note: '更新时间']
+
+    indexes {
+        user_id [name: 'idx_user_id']
+        friend_id [name: 'idx_friend_id']
+        (user_id, friend_id) [unique, name: 'idx_user_id_friend_id']
+    }
+}
+
+Table  friendsRequests as FR {
+    id bigint [pk, not null,  note: '好友请求ID',increment]
+    user_id varchar(24) [not null, note: '用户ID']
+    friend_id varchar(24) [not null,  note: '好友ID']
+    req_msg varchar(255) [note: '请求消息']
+    req_time timestamp [note: '请求时间',default: `now()`]
+    req_status tinyint [not null, default: 0,note: '请求状态(0: 待处理,1: 已同意,2: 已拒绝)']
+    update_at timestamp [not null, default: `now()`,note: '更新时间']
+
+    indexes {
+        user_id [name: 'idx_user_id']
+        friend_id [name: 'idx_friend_id']
+        (user_id, friend_id) [unique, name: 'idx_user_id_friend_id']
+    }
+}
+
+Table groups as G {
+    id varchar(24) [pk, not null,  note: '群组ID']
+    name varchar(255) [not null, note: '群组名称']
+    desc varchar(255) [note: '群组描述']
+    avatar varchar(255) [note: '群头像']
+    create_at timestamp [not null, default: `now()`,note: '创建时间']
+    update_at timestamp [not null, default: `now()`,note: '更新时间']
+    create_user_id varchar(24) [not null, note: '创建用户ID']
+    type tinyint [not null, default: 0,note: '群组类型(0: 普通群组,1: 私有群组)']
+    is_verify bool [not null, default: 0,note: '是否验证']
+    status tinyint [not null, default: 0,note: '群组状态(0: 正常,1:禁用, 2: 删除)']
+    notification text [note: '通知']
+    notification_user_id varchar(24) [note: '通知用户ID']
+
+    indexes {
+        name [name: 'idx_name']
+    }
+}
+
+Table groupMembers as GM {
+    id bigint [pk, not null,  note: '群组成员ID',increment]
+    group_id varchar(24) [not null, note: '群组ID']
+    user_id varchar(24) [not null,  note: '用户ID']
+    join_time timestamp [note: '加入时间',default: `now()`]
+    join_source tinyint [not null, default: 0,note: '加入群组来源(0: 群组邀请,1: 群组添加)']
+    role_level tinyint [not null, default: 0,note: '角色等级(0: 普通成员,1: 管理员,2: 群主)']
+    inviter_user_id varchar(24) [note: '邀请用户ID']
+    handler_user_id varchar(24) [note: '处理用户ID']
+
+    indexes {
+        group_id [name: 'idx_group_id']
+        user_id [name: 'idx_user_id']
+        (group_id, user_id) [unique, name: 'idx_group_id_user_id']
+    }
+}
+
+Table groupRequests as GR {
+    id bigint [pk, not null,  note: '群组请求ID',increment]
+    group_id varchar(24) [not null, note: '群组ID']
+    user_id varchar(24) [not null,  note: '用户ID']
+    req_msg varchar(255) [note: '请求消息']
+    req_time timestamp [note: '请求时间',default: `now()`]
+    req_status tinyint [not null, default: 0,note: '请求状态(0: 待处理,1: 已同意,2: 已拒绝)']
+    join_source tinyint [not null, default: 0,note: '加入群组来源(0: 群组邀请,1: 群组添加)']
+    inviter_user_id varchar(24) [note: '邀请用户ID']
+    handler_user_id varchar(24) [note: '处理用户ID']
+    update_at timestamp [not null, default: `now()`,note: '更新时间']
+
+    indexes {
+        group_id [name: 'idx_group_id']
+        user_id [name: 'idx_user_id']
+        (group_id, user_id) [unique, name: 'idx_group_id_user_id']
+    }
+}

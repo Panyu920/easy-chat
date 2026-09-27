@@ -3,3 +3,20 @@
     schema.dbml(1,9): A Project's name is optional or must be an identifier or a quoted identifer
     schema.dbml(13,8): Invalid column type
 
+2026-09-27T06:25:26.994Z
+
+    social.dbml(3,60): Custom setting 'auto_increment' must be a string or a color literal
+    social.dbml(19,62): Custom setting 'auto_increment' must be a string or a color literal
+    social.dbml(54,62): Custom setting 'auto_increment' must be a string or a color literal
+    social.dbml(71,62): Custom setting 'auto_increment' must be a string or a color literal
+
+2026-09-27T06:39:34.317Z
+
+    social.dbml(8,45): 'default' must be an enum value, a string literal, number literal, function expression, true, false or null
+    social.dbml(9,45): 'default' must be an enum value, a string literal, number literal, function expression, true, false or null
+    social.dbml(25,45): 'default' must be an enum value, a string literal, number literal, function expression, true, false or null
+    social.dbml(39,45): 'default' must be an enum value, a string literal, number literal, function expression, true, false or null
+    social.dbml(40,45): 'default' must be an enum value, a string literal, number literal, function expression, true, false or null
+    social.dbml(57,48): 'default' must be an enum value, a string literal, number literal, function expression, true, false or null
+    social.dbml(80,45): 'default' must be an enum value, a string literal, number literal, function expression, true, false or null
+

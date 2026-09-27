@@ -33,3 +33,6 @@ run_user_rpc:
 
 run_user_api:
 	@make -f ./deploy/mk/user_api.mk run-test
+
+db_social:
+	@make -f ./deploy/mk/db_social.mk db_social

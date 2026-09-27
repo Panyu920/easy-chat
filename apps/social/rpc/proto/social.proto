@@ -1,0 +1,193 @@
+syntax = "proto3";
+
+package social;
+option go_package = "./social";
+
+// 好友关系模型
+message Friend {
+  int64 id = 1;
+  string user_id = 2;
+  string friend_id = 3;
+  string remark = 4;    
+  int32 add_source = 5; // 添加好友来源
+}
+
+
+// 好友请求模型
+message FriendRequest {
+    int64 id = 1;
+    string user_id = 2;
+    string friend_id = 3;
+    string req_msg = 4;
+    int64 req_time = 5;
+    int32 req_status = 6; // 好友请求状态 0:待处理 1:已同意 2:已拒绝
+}
+
+// 群模型
+message Group {
+    string id = 1;
+    string group_name = 2;
+    string group_desc = 3;
+    int64 create_time = 4;
+    int32 create_user_id = 5;
+    string group_avatar = 6;
+    int32 group_type = 7; // 群类型 0:普通群 1:密聊群
+    bool is_verify = 8; // 是否需要验证
+    int32 group_status = 9; // 群状态 0:正常 1:已解散
+    string notification = 10; // 群通知消息
+    string notification_user_id = 11; // 群通知用户ID
+}
+
+// 群成员模型
+message GroupMember {
+    int64 id = 1;
+    string group_id = 2;
+    string user_id = 3;
+    int32 join_time = 4;
+    int32 join_source = 5; // 加入来源 0:普通加入 1:邀请
+    int32 role_level = 6; // 角色等级 0:普通成员 1:管理员 2:群主
+    string inviter_user_id = 7; // 邀请用户ID
+    string handler_user_id = 8; // 处理用户ID
+}
+
+// 群请求模型
+message GroupRequest {
+    int64 id = 1;
+    string group_id = 2;
+    string user_id = 3;
+    string req_msg = 4;
+    int64 req_time = 5;
+    int32 req_status = 6; // 群请求状态 0:待处理 1:已同意 2:已拒绝
+    int32 join_source = 7; // 加入来源 0:普通加入 1:邀请
+    string inviter_user_id = 8; // 邀请用户ID
+    string handler_user_id = 9; // 处理用户ID
+}
+
+
+// request response
+
+message FriendAddRequest{
+    string user_id = 1;
+    string friend_id = 2;
+    string req_msg = 3;
+    int64 req_time = 4;
+}
+
+message FriendAddResponse{
+}
+
+message FriendAddHandlerRequest{
+    int64 id = 1;
+    string user_id=2;
+    int32 req_status = 3; // 好友请求状态 0:待处理 1:已同意 2:已拒绝
+}
+
+message FriendAddHandlerResponse{
+}
+
+message FriendAddListRequest{
+    string user_id = 1;
+}
+
+message FriendAddListResponse{
+    repeated FriendRequest friend_requests = 1;
+}
+
+
+message FriendListRequest{
+    string user_id = 1;
+}
+
+message FriendListResponse {
+    repeated Friend friends = 1;
+}
+
+
+message GroupCreateRequest{
+    string user_id = 1;
+    string group_name = 2;
+    string group_avatar = 3;
+    int32 group_type = 4; // 群类型 0:普通群 1:密聊群
+    bool is_verify = 5; // 是否需要验证
+}
+
+message GroupCreateResponse{
+    string group_id = 1;
+}
+
+message GroupAddRequest{
+    string group_id = 1;
+    string user_id = 2;
+    string req_msg = 3;
+    int64 req_time = 4;
+    int32 join_source = 5; // 加入来源 0:普通加入 1:邀请
+    string inviter_user_id = 6; // 邀请用户ID
+}
+
+message GroupAddResponse{   
+    string group_id = 1;
+}
+
+
+message GroupAddListRequest{
+    string group_id = 1;
+}
+
+message GroupAddListResponse {
+    repeated GroupRequest group_requests = 1;
+}
+
+message GroupAddHandlerRequest{
+    int64 id = 1;
+    string group_id = 2;
+    string handler_user_id=3;
+    int32 req_status = 4; // 群请求状态 0:待处理 1:已同意 2:已拒绝
+}
+
+message GroupAddHandlerResponse{
+    string group_id = 1;
+}
+
+
+message GroupListRequest{
+    string user_id = 1;
+}
+message GroupListResponse {
+    repeated Group groups = 1;
+}
+
+
+message GroupMemberListRequest{
+    string group_id = 1;
+}
+message GroupMemberListResponse {
+    repeated GroupMember group_members = 1;
+}
+
+// service
+
+// 社交服务
+service SocialService {
+    // 好友添加服务
+    rpc FriendAdd(FriendAddRequest) returns (FriendAddResponse);
+    // 好友添加处理服务
+    rpc FriendAddHandler(FriendAddHandlerRequest) returns (FriendAddHandlerResponse);
+    // 好友添加列表服务
+    rpc FriendAddList(FriendAddListRequest) returns (FriendAddListResponse);
+    // 好友列表服务
+    rpc FriendList(FriendListRequest) returns (FriendListResponse);
+
+
+    // 群创建服务
+    rpc GroupCreate(GroupCreateRequest) returns (GroupCreateResponse);
+    // 群加入服务
+    rpc GroupAdd(GroupAddRequest) returns (GroupAddResponse);
+    // 群加入列表服务
+    rpc GroupAddList(GroupAddListRequest) returns (GroupAddListResponse);
+    // 群加入处理服务
+    rpc GroupAddHandler(GroupAddHandlerRequest) returns (GroupAddHandlerResponse);
+    // 群列表服务
+    rpc GroupList(GroupListRequest) returns (GroupListResponse);
+    // 群成员列表服务
+    rpc GroupMemberList(GroupMemberListRequest) returns (GroupMemberListResponse);
+}
