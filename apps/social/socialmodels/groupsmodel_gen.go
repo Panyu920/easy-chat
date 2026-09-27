@@ -49,7 +49,7 @@ type (
 		UpdateAt           time.Time      `db:"update_at"`            // 更新时间
 		CreateUserId       string         `db:"create_user_id"`       // 创建用户ID
 		Type               int64          `db:"type"`                 // 群组类型(0: 普通群组,1: 私有群组)
-		IsVerify           bool           `db:"is_verify"`            // 是否验证
+		IsVerify           int64          `db:"is_verify"`            // 是否验证
 		Status             int64          `db:"status"`               // 群组状态(0: 正常,1:禁用, 2: 删除)
 		Notification       sql.NullString `db:"notification"`         // 通知
 		NotificationUserId sql.NullString `db:"notification_user_id"` // 通知用户ID

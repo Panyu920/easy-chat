@@ -24,13 +24,15 @@ var (
 	groupRequestsRowsExpectAutoSet   = strings.Join(stringx.Remove(groupRequestsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
 	groupRequestsRowsWithPlaceHolder = strings.Join(stringx.Remove(groupRequestsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 
-	cacheGroupRequestsIdPrefix = "cache:groupRequests:id:"
+	cacheGroupRequestsIdPrefix            = "cache:groupRequests:id:"
+	cacheGroupRequestsGroupIdUserIdPrefix = "cache:groupRequests:groupId:userId:"
 )
 
 type (
 	groupRequestsModel interface {
 		Insert(ctx context.Context, data *GroupRequests) (sql.Result, error)
 		FindOne(ctx context.Context, id int64) (*GroupRequests, error)
+		FindOneByGroupIdUserId(ctx context.Context, groupId string, userId string) (*GroupRequests, error)
 		Update(ctx context.Context, data *GroupRequests) error
 		Delete(ctx context.Context, id int64) error
 	}
@@ -57,16 +59,22 @@ type (
 func newGroupRequestsModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) *defaultGroupRequestsModel {
 	return &defaultGroupRequestsModel{
 		CachedConn: sqlc.NewConn(conn, c, opts...),
-		table:      "`groupRequests`",
+		table:      "`group_requests`",
 	}
 }
 
 func (m *defaultGroupRequestsModel) Delete(ctx context.Context, id int64) error {
+	data, err := m.FindOne(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	groupRequestsGroupIdUserIdKey := fmt.Sprintf("%s%v:%v", cacheGroupRequestsGroupIdUserIdPrefix, data.GroupId, data.UserId)
 	groupRequestsIdKey := fmt.Sprintf("%s%v", cacheGroupRequestsIdPrefix, id)
-	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
 		return conn.ExecCtx(ctx, query, id)
-	}, groupRequestsIdKey)
+	}, groupRequestsGroupIdUserIdKey, groupRequestsIdKey)
 	return err
 }
 
@@ -87,21 +95,48 @@ func (m *defaultGroupRequestsModel) FindOne(ctx context.Context, id int64) (*Gro
 	}
 }
 
+func (m *defaultGroupRequestsModel) FindOneByGroupIdUserId(ctx context.Context, groupId string, userId string) (*GroupRequests, error) {
+	groupRequestsGroupIdUserIdKey := fmt.Sprintf("%s%v:%v", cacheGroupRequestsGroupIdUserIdPrefix, groupId, userId)
+	var resp GroupRequests
+	err := m.QueryRowIndexCtx(ctx, &resp, groupRequestsGroupIdUserIdKey, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
+		query := fmt.Sprintf("select %s from %s where `group_id` = ? and `user_id` = ? limit 1", groupRequestsRows, m.table)
+		if err := conn.QueryRowCtx(ctx, &resp, query, groupId, userId); err != nil {
+			return nil, err
+		}
+		return resp.Id, nil
+	}, m.queryPrimary)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
 func (m *defaultGroupRequestsModel) Insert(ctx context.Context, data *GroupRequests) (sql.Result, error) {
+	groupRequestsGroupIdUserIdKey := fmt.Sprintf("%s%v:%v", cacheGroupRequestsGroupIdUserIdPrefix, data.GroupId, data.UserId)
 	groupRequestsIdKey := fmt.Sprintf("%s%v", cacheGroupRequestsIdPrefix, data.Id)
 	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?)", m.table, groupRequestsRowsExpectAutoSet)
 		return conn.ExecCtx(ctx, query, data.GroupId, data.UserId, data.ReqMsg, data.ReqTime, data.ReqStatus, data.JoinSource, data.InviterUserId, data.HandlerUserId)
-	}, groupRequestsIdKey)
+	}, groupRequestsGroupIdUserIdKey, groupRequestsIdKey)
 	return ret, err
 }
 
-func (m *defaultGroupRequestsModel) Update(ctx context.Context, data *GroupRequests) error {
+func (m *defaultGroupRequestsModel) Update(ctx context.Context, newData *GroupRequests) error {
+	data, err := m.FindOne(ctx, newData.Id)
+	if err != nil {
+		return err
+	}
+
+	groupRequestsGroupIdUserIdKey := fmt.Sprintf("%s%v:%v", cacheGroupRequestsGroupIdUserIdPrefix, data.GroupId, data.UserId)
 	groupRequestsIdKey := fmt.Sprintf("%s%v", cacheGroupRequestsIdPrefix, data.Id)
-	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, groupRequestsRowsWithPlaceHolder)
-		return conn.ExecCtx(ctx, query, data.GroupId, data.UserId, data.ReqMsg, data.ReqTime, data.ReqStatus, data.JoinSource, data.InviterUserId, data.HandlerUserId, data.Id)
-	}, groupRequestsIdKey)
+		return conn.ExecCtx(ctx, query, newData.GroupId, newData.UserId, newData.ReqMsg, newData.ReqTime, newData.ReqStatus, newData.JoinSource, newData.InviterUserId, newData.HandlerUserId, newData.Id)
+	}, groupRequestsGroupIdUserIdKey, groupRequestsIdKey)
 	return err
 }
 

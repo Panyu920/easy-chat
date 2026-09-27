@@ -14,5 +14,7 @@ migrate_up:
 migrate_down:
 	migrate -path $(migrate_path) -database "$(db_url)" -verbose down
 
+migrate_down_1:
+	migrate -path $(migrate_path) -database "$(db_url)" -verbose down 1
 sqlc:
 	sqlc generate

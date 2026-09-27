@@ -24,15 +24,21 @@ var (
 	friendsRequestsRowsExpectAutoSet   = strings.Join(stringx.Remove(friendsRequestsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
 	friendsRequestsRowsWithPlaceHolder = strings.Join(stringx.Remove(friendsRequestsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 
-	cacheFriendsRequestsIdPrefix = "cache:friendsRequests:id:"
+	cacheFriendsRequestsIdPrefix             = "cache:friendsRequests:id:"
+	cacheFriendsRequestsUserIdFriendIdPrefix = "cache:friendsRequests:userId:friendId:"
 )
 
 type (
 	friendsRequestsModel interface {
 		Insert(ctx context.Context, data *FriendsRequests) (sql.Result, error)
 		FindOne(ctx context.Context, id int64) (*FriendsRequests, error)
+		FindOneByUserIdFriendId(ctx context.Context, userId string, friendId string) (*FriendsRequests, error)
 		Update(ctx context.Context, data *FriendsRequests) error
 		Delete(ctx context.Context, id int64) error
+
+		UpdateTx(ctx context.Context, session sqlx.Session, data *FriendsRequests) error
+		CustomTx(ctx context.Context, tx func(ctx context.Context, conn sqlx.Session) error) error
+		ListFriendRequests(ctx context.Context, userId string) ([]*FriendsRequests, error)
 	}
 
 	defaultFriendsRequestsModel struct {
@@ -54,16 +60,22 @@ type (
 func newFriendsRequestsModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) *defaultFriendsRequestsModel {
 	return &defaultFriendsRequestsModel{
 		CachedConn: sqlc.NewConn(conn, c, opts...),
-		table:      "`friendsRequests`",
+		table:      "`friends_requests`",
 	}
 }
 
 func (m *defaultFriendsRequestsModel) Delete(ctx context.Context, id int64) error {
+	data, err := m.FindOne(ctx, id)
+	if err != nil {
+		return err
+	}
+
 	friendsRequestsIdKey := fmt.Sprintf("%s%v", cacheFriendsRequestsIdPrefix, id)
-	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+	friendsRequestsUserIdFriendIdKey := fmt.Sprintf("%s%v:%v", cacheFriendsRequestsUserIdFriendIdPrefix, data.UserId, data.FriendId)
+	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
 		return conn.ExecCtx(ctx, query, id)
-	}, friendsRequestsIdKey)
+	}, friendsRequestsIdKey, friendsRequestsUserIdFriendIdKey)
 	return err
 }
 
@@ -84,24 +96,76 @@ func (m *defaultFriendsRequestsModel) FindOne(ctx context.Context, id int64) (*F
 	}
 }
 
+func (m *defaultFriendsRequestsModel) FindOneByUserIdFriendId(ctx context.Context, userId string, friendId string) (*FriendsRequests, error) {
+	friendsRequestsUserIdFriendIdKey := fmt.Sprintf("%s%v:%v", cacheFriendsRequestsUserIdFriendIdPrefix, userId, friendId)
+	var resp FriendsRequests
+	err := m.QueryRowIndexCtx(ctx, &resp, friendsRequestsUserIdFriendIdKey, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
+		query := fmt.Sprintf("select %s from %s where `user_id` = ? and `friend_id` = ? limit 1", friendsRequestsRows, m.table)
+		if err := conn.QueryRowCtx(ctx, &resp, query, userId, friendId); err != nil {
+			return nil, err
+		}
+		return resp.Id, nil
+	}, m.queryPrimary)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
 func (m *defaultFriendsRequestsModel) Insert(ctx context.Context, data *FriendsRequests) (sql.Result, error) {
 	friendsRequestsIdKey := fmt.Sprintf("%s%v", cacheFriendsRequestsIdPrefix, data.Id)
+	friendsRequestsUserIdFriendIdKey := fmt.Sprintf("%s%v:%v", cacheFriendsRequestsUserIdFriendIdPrefix, data.UserId, data.FriendId)
 	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, friendsRequestsRowsExpectAutoSet)
 		return conn.ExecCtx(ctx, query, data.UserId, data.FriendId, data.ReqMsg, data.ReqTime, data.ReqStatus)
-	}, friendsRequestsIdKey)
+	}, friendsRequestsIdKey, friendsRequestsUserIdFriendIdKey)
 	return ret, err
 }
 
-func (m *defaultFriendsRequestsModel) Update(ctx context.Context, data *FriendsRequests) error {
+func (m *defaultFriendsRequestsModel) Update(ctx context.Context, newData *FriendsRequests) error {
+	data, err := m.FindOne(ctx, newData.Id)
+	if err != nil {
+		return err
+	}
+
+	friendsRequestsIdKey := fmt.Sprintf("%s%v", cacheFriendsRequestsIdPrefix, data.Id)
+	friendsRequestsUserIdFriendIdKey := fmt.Sprintf("%s%v:%v", cacheFriendsRequestsUserIdFriendIdPrefix, data.UserId, data.FriendId)
+	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, friendsRequestsRowsWithPlaceHolder)
+		return conn.ExecCtx(ctx, query, newData.UserId, newData.FriendId, newData.ReqMsg, newData.ReqTime, newData.ReqStatus, newData.Id)
+	}, friendsRequestsIdKey, friendsRequestsUserIdFriendIdKey)
+	return err
+}
+
+// 更新好友申请记录
+func (m *defaultFriendsRequestsModel) UpdateTx(ctx context.Context, session sqlx.Session, data *FriendsRequests) error {
 	friendsRequestsIdKey := fmt.Sprintf("%s%v", cacheFriendsRequestsIdPrefix, data.Id)
 	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, friendsRequestsRowsWithPlaceHolder)
-		return conn.ExecCtx(ctx, query, data.UserId, data.FriendId, data.ReqMsg, data.ReqTime, data.ReqStatus, data.Id)
+		return session.ExecCtx(ctx, query, data.UserId, data.FriendId, data.ReqMsg, data.ReqTime, data.ReqStatus, data.Id)
 	}, friendsRequestsIdKey)
 	return err
 }
 
+func (m *defaultFriendsRequestsModel) ListFriendRequests(ctx context.Context, userId string) ([]*FriendsRequests, error) {
+	query := fmt.Sprintf("select %s from %s where `friend_id` = ?", friendsRequestsRows, m.table)
+	var resp []*FriendsRequests
+	if err := m.QueryRowsNoCacheCtx(ctx, &resp, query, userId); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// 自定义事务
+func (m *defaultFriendsRequestsModel) CustomTx(ctx context.Context, tx func(ctx context.Context, conn sqlx.Session) error) error {
+	return m.TransactCtx(ctx, func(ctx context.Context, s sqlx.Session) error {
+		return tx(ctx, s)
+	})
+}
 func (m *defaultFriendsRequestsModel) formatPrimary(primary any) string {
 	return fmt.Sprintf("%s%v", cacheFriendsRequestsIdPrefix, primary)
 }

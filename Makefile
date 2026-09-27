@@ -25,6 +25,8 @@ db_migrate_up:
 	@make -f ./deploy/mk/db.mk migrate_up
 db_migrate_down:
 	@make -f ./deploy/mk/db.mk migrate_down
+db_migrate_down_1:
+	@make -f ./deploy/mk/db.mk migrate_down_1
 db_sqlc:
 	@make -f ./deploy/mk/db.mk sqlc
 
@@ -36,3 +38,6 @@ run_user_api:
 
 db_social:
 	@make -f ./deploy/mk/db_social.mk db_social
+
+run_social_rpc:
+	@make -f ./deploy/mk/social_rpc.mk run-test
