@@ -29,7 +29,7 @@ message Group {
     string group_name = 2;
     string group_desc = 3;
     int64 create_time = 4;
-    int32 create_user_id = 5;
+    string create_user_id = 5;
     string group_avatar = 6;
     int32 group_type = 7; // 群类型 0:普通群 1:密聊群
     bool is_verify = 8; // 是否需要验证

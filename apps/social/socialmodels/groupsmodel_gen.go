@@ -33,6 +33,10 @@ type (
 		FindOne(ctx context.Context, id string) (*Groups, error)
 		Update(ctx context.Context, data *Groups) error
 		Delete(ctx context.Context, id string) error
+
+		CustomTx(ctx context.Context, tx func(ctx context.Context, session sqlx.Session) error) error
+		InsertTx(ctx context.Context, session sqlx.Session, data *Groups) (sql.Result, error)
+		ListGroupsByIds(ctx context.Context, ids []string) ([]*Groups, error)
 	}
 
 	defaultGroupsModel struct {
@@ -98,6 +102,15 @@ func (m *defaultGroupsModel) Insert(ctx context.Context, data *Groups) (sql.Resu
 	return ret, err
 }
 
+func (m *defaultGroupsModel) InsertTx(ctx context.Context, session sqlx.Session, data *Groups) (sql.Result, error) {
+	groupsIdKey := fmt.Sprintf("%s%v", cacheGroupsIdPrefix, data.Id)
+	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, groupsRowsExpectAutoSet)
+		return session.ExecCtx(ctx, query, data.Id, data.Name, data.Desc, data.Avatar, data.CreateUserId, data.Type, data.IsVerify, data.Status, data.Notification, data.NotificationUserId)
+	}, groupsIdKey)
+	return ret, err
+}
+
 func (m *defaultGroupsModel) Update(ctx context.Context, data *Groups) error {
 	groupsIdKey := fmt.Sprintf("%s%v", cacheGroupsIdPrefix, data.Id)
 	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
@@ -107,6 +120,39 @@ func (m *defaultGroupsModel) Update(ctx context.Context, data *Groups) error {
 	return err
 }
 
+// 自定义事务
+func (m *defaultGroupsModel) CustomTx(ctx context.Context, tx func(ctx context.Context, session sqlx.Session) error) error {
+	return m.TransactCtx(ctx, func(ctx context.Context, s sqlx.Session) error {
+		return tx(ctx, s)
+	})
+}
+
+func (m *defaultGroupsModel) ListGroupsByIds(ctx context.Context, ids []string) ([]*Groups, error) {
+	if len(ids) == 0 {
+		return []*Groups{}, nil // 空切片直接返回，避免生成非法SQL
+	}
+	// 生成 ?,?,? 占位符，数量和ids长度一致
+	placeholders := strings.Repeat("?,", len(ids))
+	placeholders = placeholders[:len(placeholders)-1] // 去掉末尾逗号
+
+	query := fmt.Sprintf("select %s from %s where `id` in (%s) order by `id` desc limit 100",
+		groupsRows, m.table, placeholders)
+
+	// []string 直接转 []any
+	args := make([]any, 0, len(ids))
+	for _, v := range ids {
+		args = append(args, v)
+	}
+
+	var resp []*Groups
+	err := m.QueryRowsNoCacheCtx(ctx, &resp, query, args...)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return nil, err
+	}
+}
 func (m *defaultGroupsModel) formatPrimary(primary any) string {
 	return fmt.Sprintf("%s%v", cacheGroupsIdPrefix, primary)
 }

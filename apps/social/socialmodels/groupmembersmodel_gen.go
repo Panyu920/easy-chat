@@ -35,6 +35,10 @@ type (
 		FindOneByGroupIdUserId(ctx context.Context, groupId string, userId string) (*GroupMembers, error)
 		Update(ctx context.Context, data *GroupMembers) error
 		Delete(ctx context.Context, id int64) error
+
+		InsertTx(ctx context.Context, session sqlx.Session, data *GroupMembers) (sql.Result, error)
+		ListGroupsByUserId(ctx context.Context, userId string) ([]*GroupMembers, error)
+		ListMembersByGroupId(ctx context.Context, groupId string) ([]*GroupMembers, error)
 	}
 
 	defaultGroupMembersModel struct {
@@ -122,6 +126,15 @@ func (m *defaultGroupMembersModel) Insert(ctx context.Context, data *GroupMember
 	}, groupMembersGroupIdUserIdKey, groupMembersIdKey)
 	return ret, err
 }
+func (m *defaultGroupMembersModel) InsertTx(ctx context.Context, session sqlx.Session, data *GroupMembers) (sql.Result, error) {
+	groupMembersGroupIdUserIdKey := fmt.Sprintf("%s%v:%v", cacheGroupMembersGroupIdUserIdPrefix, data.GroupId, data.UserId)
+	groupMembersIdKey := fmt.Sprintf("%s%v", cacheGroupMembersIdPrefix, data.Id)
+	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?)", m.table, groupMembersRowsExpectAutoSet)
+		return session.ExecCtx(ctx, query, data.GroupId, data.UserId, data.JoinTime, data.JoinSource, data.RoleLevel, data.InviterUserId, data.HandlerUserId)
+	}, groupMembersGroupIdUserIdKey, groupMembersIdKey)
+	return ret, err
+}
 
 func (m *defaultGroupMembersModel) Update(ctx context.Context, newData *GroupMembers) error {
 	data, err := m.FindOne(ctx, newData.Id)
@@ -136,6 +149,29 @@ func (m *defaultGroupMembersModel) Update(ctx context.Context, newData *GroupMem
 		return conn.ExecCtx(ctx, query, newData.GroupId, newData.UserId, newData.JoinTime, newData.JoinSource, newData.RoleLevel, newData.InviterUserId, newData.HandlerUserId, newData.Id)
 	}, groupMembersGroupIdUserIdKey, groupMembersIdKey)
 	return err
+}
+
+func (m *defaultGroupMembersModel) ListGroupsByUserId(ctx context.Context, userId string) ([]*GroupMembers, error) {
+	groupsKey := fmt.Sprintf("select %s from %s where `user_id` = ? order by `role_level` desc ", groupMembersRows, m.table)
+	var resp []*GroupMembers
+	err := m.QueryRowsNoCacheCtx(ctx, &resp, groupsKey, userId)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return nil, err
+	}
+}
+func (m *defaultGroupMembersModel) ListMembersByGroupId(ctx context.Context, groupId string) ([]*GroupMembers, error) {
+	groupsKey := fmt.Sprintf("select %s from %s where `group_id` = ? order by `id` desc limit 100", groupMembersRows, m.table)
+	var resp []*GroupMembers
+	err := m.QueryRowsNoCacheCtx(ctx, &resp, groupsKey, groupId)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return nil, err
+	}
 }
 
 func (m *defaultGroupMembersModel) formatPrimary(primary any) string {

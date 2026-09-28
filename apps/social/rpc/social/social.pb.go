@@ -190,7 +190,7 @@ type Group struct {
 	GroupName          string                 `protobuf:"bytes,2,opt,name=group_name,json=groupName,proto3" json:"group_name,omitempty"`
 	GroupDesc          string                 `protobuf:"bytes,3,opt,name=group_desc,json=groupDesc,proto3" json:"group_desc,omitempty"`
 	CreateTime         int64                  `protobuf:"varint,4,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	CreateUserId       int32                  `protobuf:"varint,5,opt,name=create_user_id,json=createUserId,proto3" json:"create_user_id,omitempty"`
+	CreateUserId       string                 `protobuf:"bytes,5,opt,name=create_user_id,json=createUserId,proto3" json:"create_user_id,omitempty"`
 	GroupAvatar        string                 `protobuf:"bytes,6,opt,name=group_avatar,json=groupAvatar,proto3" json:"group_avatar,omitempty"`
 	GroupType          int32                  `protobuf:"varint,7,opt,name=group_type,json=groupType,proto3" json:"group_type,omitempty"`                              // 群类型 0:普通群 1:密聊群
 	IsVerify           bool                   `protobuf:"varint,8,opt,name=is_verify,json=isVerify,proto3" json:"is_verify,omitempty"`                                 // 是否需要验证
@@ -259,11 +259,11 @@ func (x *Group) GetCreateTime() int64 {
 	return 0
 }
 
-func (x *Group) GetCreateUserId() int32 {
+func (x *Group) GetCreateUserId() string {
 	if x != nil {
 		return x.CreateUserId
 	}
-	return 0
+	return ""
 }
 
 func (x *Group) GetGroupAvatar() string {
@@ -1546,7 +1546,7 @@ const file_apps_social_rpc_proto_social_proto_rawDesc = "" +
 	"group_desc\x18\x03 \x01(\tR\tgroupDesc\x12\x1f\n" +
 	"\vcreate_time\x18\x04 \x01(\x03R\n" +
 	"createTime\x12$\n" +
-	"\x0ecreate_user_id\x18\x05 \x01(\x05R\fcreateUserId\x12!\n" +
+	"\x0ecreate_user_id\x18\x05 \x01(\tR\fcreateUserId\x12!\n" +
 	"\fgroup_avatar\x18\x06 \x01(\tR\vgroupAvatar\x12\x1d\n" +
 	"\n" +
 	"group_type\x18\a \x01(\x05R\tgroupType\x12\x1b\n" +

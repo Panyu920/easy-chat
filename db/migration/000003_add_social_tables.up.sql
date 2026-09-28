@@ -32,7 +32,7 @@ CREATE TABLE `friends_requests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='好友请求' COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `groups` (
-  `id` varchar(24) NOT NULL COMMENT '群组ID',
+  `id` varchar(32) NOT NULL COMMENT '群组ID',
   `name` varchar(255) NOT NULL COMMENT '群组名称',
   `desc` varchar(255) COMMENT '群组描述',
   `avatar` varchar(255) COMMENT '群头像',
@@ -50,7 +50,7 @@ CREATE TABLE `groups` (
 
 CREATE TABLE `group_members` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '群组成员ID',
-  `group_id` varchar(24) NOT NULL COMMENT '群组ID',
+  `group_id` varchar(32) NOT NULL COMMENT '群组ID',
   `user_id` varchar(24) NOT NULL COMMENT '用户ID',
   `join_time` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '加入时间',
   `join_source` tinyint NOT NULL DEFAULT 0 COMMENT '加入群组来源(0: 群组邀请,1: 群组添加)',
@@ -65,7 +65,7 @@ CREATE TABLE `group_members` (
 
 CREATE TABLE `group_requests` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '群组请求ID',
-  `group_id` varchar(24) NOT NULL COMMENT '群组ID',
+  `group_id` varchar(32) NOT NULL COMMENT '群组ID',
   `user_id` varchar(24) NOT NULL COMMENT '用户ID',
   `req_msg` varchar(255) COMMENT '请求消息',
   `req_time` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '请求时间',
