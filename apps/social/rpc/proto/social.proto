@@ -44,10 +44,11 @@ message GroupMember {
     string group_id = 2;
     string user_id = 3;
     int32 join_time = 4;
-    int32 join_source = 5; // 加入来源 0:普通加入 1:邀请
-    int32 role_level = 6; // 角色等级 0:普通成员 1:管理员 2:群主
-    string inviter_user_id = 7; // 邀请用户ID
-    string handler_user_id = 8; // 处理用户ID
+    string nickname = 5; // 群成员昵称
+    int32 join_source = 6; // 加入来源 0:普通加入 1:邀请
+    int32 role_level = 7; // 角色等级 0:普通成员 1:管理员 2:群主
+    string inviter_user_id = 8; // 邀请用户ID
+    string handler_user_id = 9; // 处理用户ID
 }
 
 // 群请求模型

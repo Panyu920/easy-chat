@@ -1,0 +1,183 @@
+syntax = "v1"
+
+info (
+	title:   "social api"
+	desc:    "社交模块API,好友、群组相关接口"
+	version: "v1"
+)
+
+type (
+	Friend {
+		FriendId  string `json:"friend_id"`
+		Avatar    string `json:"avatar"`
+		Remark    string `json:"remark"`
+		AddSource int32  `json:"add_source"`
+	}
+	FriendRequest {
+		Id         int64  `json:"id"`
+		UserId     string `json:"user_id"`
+		FriendId   string `json:"friend_id"`
+		ReqMsg     string `json:"req_msg"`
+		ReqTime    int64  `json:"req_time"`
+		ReqStatus  int32  `json:"req_status"` //0待处理1同意2拒绝
+		UserAvatar string `json:"user_avatar"`
+		UserName   string `json:"user_name"`
+	}
+	Group {
+		Id                 string `json:"id"`
+		GroupName          string `json:"group_name"`
+		GroupDesc          string `json:"group_desc"`
+		CreateTime         int64  `json:"create_time"`
+		CreateUserId       string `json:"create_user_id"`
+		GroupAvatar        string `json:"group_avatar"`
+		GroupType          int32  `json:"group_type"` //0普通群1密聊群
+		IsVerify           bool   `json:"is_verify"`
+		GroupStatus        int32  `json:"group_status"` //0正常1解散
+		Notification       string `json:"notification"`
+		NotificationUserId string `json:"notification_user_id"`
+	}
+	GroupMember {
+		Id            int64  `json:"id"`
+		GroupId       string `json:"group_id"`
+		UserId        string `json:"user_id"`
+		JoinTime      int64  `json:"join_time"`
+		UserAvatar    string `json:"user_avatar"`
+		NickName      string `json:"nick_name"`
+		JoinSource    int32  `json:"join_source"` //0普通加入1邀请
+		RoleLevel     int32  `json:"role_level"` //0普通成员1管理员2群主
+		InviterUserId string `json:"inviter_user_id"`
+		HandlerUserId string `json:"handler_user_id"`
+	}
+	GroupRequest {
+		Id            int64  `json:"id"`
+		GroupId       string `json:"group_id"`
+		UserId        string `json:"user_id"`
+		ReqMsg        string `json:"req_msg"`
+		ReqTime       int64  `json:"req_time"`
+		ReqStatus     int32  `json:"req_status"` //0待处理1同意2拒绝
+		JoinSource    int32  `json:"join_source"`
+		InviterUserId string `json:"inviter_user_id"`
+		HandlerUserId string `json:"handler_user_id"`
+		UserAvatar    string `json:"user_avatar"`
+		UserName      string `json:"user_name"`
+	}
+	FriendAddReq {
+		FriendId string `json:"friend_id"`
+		ReqMsg   string `json:"req_msg"`
+		ReqTime  int64  `json:"req_time"`
+	}
+	FriendAddResp {
+		FriendRequest FriendRequest `json:"friend_request"`
+	}
+	FriendAddHandlerReq {
+		Id        int64 `json:"id"`
+		ReqStatus int32 `json:"req_status"`
+	}
+	FriendAddHandlerResp  {}
+	FriendAddListReq  {}
+	FriendAddListResp {
+		FriendRequests []FriendRequest `json:"friend_requests"`
+	}
+	FriendListReq  {}
+	FriendListResp {
+		Friends []Friend `json:"friends"`
+	}
+	GroupCreateReq {
+		GroupName   string `json:"group_name"`
+		GroupAvatar string `json:"group_avatar"`
+		GroupType   int32  `json:"group_type"`
+		IsVerify    bool   `json:"is_verify"`
+	}
+	GroupCreateResp {
+		GroupInfo Group `json:"group_info"`
+	}
+	GroupAddReq {
+		GroupId       string `json:"group_id"`
+		ReqMsg        string `json:"req_msg"`
+		ReqTime       int64  `json:"req_time"`
+		JoinSource    int32  `json:"join_source"`
+		InviterUserId string `json:"inviter_user_id"`
+	}
+	GroupAddResp {
+		GroupId string `json:"group_id"`
+	}
+	GroupAddListReq {
+		GroupId string `json:"group_id"`
+	}
+	GroupAddListResp {
+		GroupRequests []GroupRequest `json:"group_requests"`
+	}
+	GroupAddHandlerReq {
+		Id        int64  `json:"id"`
+		GroupId   string `json:"group_id"`
+		ReqStatus int32  `json:"req_status"`
+	}
+	GroupAddHandlerResp {
+		GroupId string `json:"group_id"`
+	}
+	GroupListReq  {}
+	GroupListResp {
+		Groups []Group `json:"groups"`
+	}
+	GroupMemberListReq {
+		GroupId string `json:"group_id"`
+	}
+	GroupMemberListResp {
+		GroupMembers []GroupMember `json:"group_members"`
+	}
+)
+
+@server (
+	prefix: /social
+	group:  friend
+	jwt:    JwtAuth
+)
+service social {
+	@doc "添加好友申请"
+	@handler add_friend
+	post /friend/add (FriendAddReq) returns (FriendAddResp)
+
+	@doc "处理好友申请（同意/拒绝）"
+	@handler handle_friend_add
+	post /friend/add/handler (FriendAddHandlerReq) returns (FriendAddHandlerResp)
+
+	@doc "获取好友申请列表"
+	@handler get_friend_add_list
+	get /friend/add/list (FriendAddListReq) returns (FriendAddListResp)
+
+	@doc "好友列表"
+	@handler get_friend_list
+	get /friend/list (FriendListReq) returns (FriendListResp)
+}
+
+@server (
+	prefix: /social
+	group:  group
+	jwt:    JwtAuth
+)
+service social {
+	@doc "创建群组"
+	@handler create_group
+	post /group/create (GroupCreateReq) returns (GroupCreateResp)
+
+	@doc "申请加入群组"
+	@handler add_group
+	post /group/add (GroupAddReq) returns (GroupAddResp)
+
+	@doc "获取群申请列表"
+	@handler get_group_add_list
+	get /group/add/list (GroupAddListReq) returns (GroupAddListResp)
+
+	@doc "处理群申请"
+	@handler handle_group_add
+	post /group/add/handler (GroupAddHandlerReq) returns (GroupAddHandlerResp)
+
+	@doc "用户所属群组列表"
+	@handler get_group_list
+	get /group/list (GroupListReq) returns (GroupListResp)
+
+	@doc "群成员列表"
+	@handler get_group_member_list
+	get /group/member/list (GroupMemberListReq) returns (GroupMemberListResp)
+}
+

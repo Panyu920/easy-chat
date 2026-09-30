@@ -315,10 +315,11 @@ type GroupMember struct {
 	GroupId       string                 `protobuf:"bytes,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	JoinTime      int32                  `protobuf:"varint,4,opt,name=join_time,json=joinTime,proto3" json:"join_time,omitempty"`
-	JoinSource    int32                  `protobuf:"varint,5,opt,name=join_source,json=joinSource,proto3" json:"join_source,omitempty"`           // 加入来源 0:普通加入 1:邀请
-	RoleLevel     int32                  `protobuf:"varint,6,opt,name=role_level,json=roleLevel,proto3" json:"role_level,omitempty"`              // 角色等级 0:普通成员 1:管理员 2:群主
-	InviterUserId string                 `protobuf:"bytes,7,opt,name=inviter_user_id,json=inviterUserId,proto3" json:"inviter_user_id,omitempty"` // 邀请用户ID
-	HandlerUserId string                 `protobuf:"bytes,8,opt,name=handler_user_id,json=handlerUserId,proto3" json:"handler_user_id,omitempty"` // 处理用户ID
+	Nickname      string                 `protobuf:"bytes,5,opt,name=nickname,proto3" json:"nickname,omitempty"`                                  // 群成员昵称
+	JoinSource    int32                  `protobuf:"varint,6,opt,name=join_source,json=joinSource,proto3" json:"join_source,omitempty"`           // 加入来源 0:普通加入 1:邀请
+	RoleLevel     int32                  `protobuf:"varint,7,opt,name=role_level,json=roleLevel,proto3" json:"role_level,omitempty"`              // 角色等级 0:普通成员 1:管理员 2:群主
+	InviterUserId string                 `protobuf:"bytes,8,opt,name=inviter_user_id,json=inviterUserId,proto3" json:"inviter_user_id,omitempty"` // 邀请用户ID
+	HandlerUserId string                 `protobuf:"bytes,9,opt,name=handler_user_id,json=handlerUserId,proto3" json:"handler_user_id,omitempty"` // 处理用户ID
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -379,6 +380,13 @@ func (x *GroupMember) GetJoinTime() int32 {
 		return x.JoinTime
 	}
 	return 0
+}
+
+func (x *GroupMember) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
 }
 
 func (x *GroupMember) GetJoinSource() int32 {
@@ -1554,18 +1562,19 @@ const file_apps_social_rpc_proto_social_proto_rawDesc = "" +
 	"\fgroup_status\x18\t \x01(\x05R\vgroupStatus\x12\"\n" +
 	"\fnotification\x18\n" +
 	" \x01(\tR\fnotification\x120\n" +
-	"\x14notification_user_id\x18\v \x01(\tR\x12notificationUserId\"\xfe\x01\n" +
+	"\x14notification_user_id\x18\v \x01(\tR\x12notificationUserId\"\x9a\x02\n" +
 	"\vGroupMember\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bgroup_id\x18\x02 \x01(\tR\agroupId\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x1b\n" +
-	"\tjoin_time\x18\x04 \x01(\x05R\bjoinTime\x12\x1f\n" +
-	"\vjoin_source\x18\x05 \x01(\x05R\n" +
+	"\tjoin_time\x18\x04 \x01(\x05R\bjoinTime\x12\x1a\n" +
+	"\bnickname\x18\x05 \x01(\tR\bnickname\x12\x1f\n" +
+	"\vjoin_source\x18\x06 \x01(\x05R\n" +
 	"joinSource\x12\x1d\n" +
 	"\n" +
-	"role_level\x18\x06 \x01(\x05R\troleLevel\x12&\n" +
-	"\x0finviter_user_id\x18\a \x01(\tR\rinviterUserId\x12&\n" +
-	"\x0fhandler_user_id\x18\b \x01(\tR\rhandlerUserId\"\x96\x02\n" +
+	"role_level\x18\a \x01(\x05R\troleLevel\x12&\n" +
+	"\x0finviter_user_id\x18\b \x01(\tR\rinviterUserId\x12&\n" +
+	"\x0fhandler_user_id\x18\t \x01(\tR\rhandlerUserId\"\x96\x02\n" +
 	"\fGroupRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bgroup_id\x18\x02 \x01(\tR\agroupId\x12\x17\n" +

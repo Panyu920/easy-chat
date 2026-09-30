@@ -39,6 +39,7 @@ func NewFriendAddHandlerLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 func (l *FriendAddHandlerLogic) FriendAddHandler(in *social.FriendAddHandlerRequest) (*social.FriendAddHandlerResponse, error) {
 	// todo: add your logic here and delete this line
 	// 1. 检查好友请求是否存在
+	println("in.Id:", in.Id)
 	req, err := l.svcCtx.FriendsRequestsModel.FindOne(l.ctx, in.Id)
 	if err != nil {
 		if err == socialmodels.ErrNotFound {
@@ -46,7 +47,14 @@ func (l *FriendAddHandlerLogic) FriendAddHandler(in *social.FriendAddHandlerRequ
 		}
 		return nil, errors.Wrapf(xerr.NewDBError(), "查询好友请求失败 err %v, id %v", err, in.Id)
 	}
+	println("req:", req)
 	if req.FriendId != in.UserId {
+		println(111111111111)
+		println("req.UserId:", req.UserId)
+		println("req.FriendId:", req.FriendId)
+		println("req.ReqStatus:", req.ReqStatus)
+
+		println("in.UserId:", in.UserId)
 		return nil, errors.WithStack(ErrFriendAuthError)
 	}
 
