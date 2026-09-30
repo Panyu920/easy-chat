@@ -34,6 +34,7 @@ func main() {
 		}
 	})
 	defer s.Stop()
+
 	// 注册UnaryInterceptor
 	s.AddUnaryInterceptors(rpcserver.LogInterceptor)
 

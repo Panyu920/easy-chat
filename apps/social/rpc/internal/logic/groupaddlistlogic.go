@@ -6,10 +6,16 @@ import (
 	"easy-chat/apps/social/rpc/internal/svc"
 	"easy-chat/apps/social/rpc/social"
 	"easy-chat/apps/social/socialmodels"
+	"easy-chat/pkg/constant"
 	"easy-chat/pkg/xerr"
 
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
+)
+
+var (
+	ErrUserNotGroupMember = xerr.New(xerr.REQUEST_PARAM_ERROR, "用户不是群成员")
+	ErrUserNotGroupAdmin  = xerr.New(xerr.REQUEST_PARAM_ERROR, "用户不是群管理员")
 )
 
 type GroupAddListLogic struct {
@@ -29,6 +35,18 @@ func NewGroupAddListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Grou
 // 群加入列表服务
 func (l *GroupAddListLogic) GroupAddList(in *social.GroupAddListRequest) (*social.GroupAddListResponse, error) {
 	// todo: add your logic here and delete this line
+	// 1. 检查用户是否为群主或群管理员
+	memberInfo, err := l.svcCtx.GroupMembersModel.FindOneByGroupIdUserId(l.ctx, in.GroupId, in.UserId)
+	if err != nil {
+		if socialmodels.ErrNotFound == err {
+			return nil, errors.WithStack(ErrUserNotGroupMember)
+		}
+		return nil, errors.Wrapf(xerr.NewDBError(), "find group member failed err %v, group_id %s, user_id %s", err, in.GetGroupId(), in.GetUserId())
+	}
+	if memberInfo.RoleLevel != int64(constant.Admin) && memberInfo.RoleLevel != int64(constant.Owner) {
+		return nil, errors.WithStack(ErrUserNotGroupAdmin)
+	}
+	// 2. 查询群加入列表
 	groupRequests, err := l.svcCtx.GroupRequestsModel.ListGroupRequests(l.ctx, in.GroupId)
 	if err != nil {
 		return nil, errors.Wrapf(xerr.NewDBError(), "list group requests failed err %v, group_id %s", err, in.GetGroupId())

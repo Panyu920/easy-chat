@@ -29,6 +29,14 @@ func NewGroupMemberListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 // 群成员列表服务
 func (l *GroupMemberListLogic) GroupMemberList(in *social.GroupMemberListRequest) (*social.GroupMemberListResponse, error) {
 	// todo: add your logic here and delete this line
+	// 1.检查用户是否为该群成员
+	_, err := l.svcCtx.GroupMembersModel.FindOneByGroupIdUserId(l.ctx, in.GroupId, in.UserId)
+	if err != nil {
+		if errors.Is(err, socialmodels.ErrNotFound) {
+			return nil, errors.WithStack(ErrUserNotGroupMember)
+		}
+		return nil, errors.Wrapf(xerr.NewDBError(), "find group member failed: %v, group_id: %s, user_id: %s", err, in.GroupId, in.UserId)
+	}
 	groupMembers, err := l.svcCtx.GroupMembersModel.ListMembersByGroupId(l.ctx, in.GroupId)
 	if err != nil {
 		return nil, errors.Wrapf(xerr.NewDBError(), "list group members failed: %v, group_id: %s", err, in.GroupId)

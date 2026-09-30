@@ -909,6 +909,7 @@ type GroupCreateRequest struct {
 	GroupAvatar   string                 `protobuf:"bytes,3,opt,name=group_avatar,json=groupAvatar,proto3" json:"group_avatar,omitempty"`
 	GroupType     int32                  `protobuf:"varint,4,opt,name=group_type,json=groupType,proto3" json:"group_type,omitempty"` // 群类型 0:普通群 1:密聊群
 	IsVerify      bool                   `protobuf:"varint,5,opt,name=is_verify,json=isVerify,proto3" json:"is_verify,omitempty"`    // 是否需要验证
+	Nickname      string                 `protobuf:"bytes,6,opt,name=nickname,proto3" json:"nickname,omitempty"`                     // 群成员昵称
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -976,6 +977,13 @@ func (x *GroupCreateRequest) GetIsVerify() bool {
 		return x.IsVerify
 	}
 	return false
+}
+
+func (x *GroupCreateRequest) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
 }
 
 type GroupCreateResponse struct {
@@ -1153,6 +1161,7 @@ func (x *GroupAddResponse) GetGroupId() string {
 type GroupAddListRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1190,6 +1199,13 @@ func (*GroupAddListRequest) Descriptor() ([]byte, []int) {
 func (x *GroupAddListRequest) GetGroupId() string {
 	if x != nil {
 		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GroupAddListRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -1441,6 +1457,7 @@ func (x *GroupListResponse) GetGroups() []*Group {
 type GroupMemberListRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1478,6 +1495,13 @@ func (*GroupMemberListRequest) Descriptor() ([]byte, []int) {
 func (x *GroupMemberListRequest) GetGroupId() string {
 	if x != nil {
 		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GroupMemberListRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -1606,7 +1630,7 @@ const file_apps_social_rpc_proto_social_proto_rawDesc = "" +
 	"\x11FriendListRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\">\n" +
 	"\x12FriendListResponse\x12(\n" +
-	"\afriends\x18\x01 \x03(\v2\x0e.social.FriendR\afriends\"\xab\x01\n" +
+	"\afriends\x18\x01 \x03(\v2\x0e.social.FriendR\afriends\"\xc7\x01\n" +
 	"\x12GroupCreateRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
@@ -1614,7 +1638,8 @@ const file_apps_social_rpc_proto_social_proto_rawDesc = "" +
 	"\fgroup_avatar\x18\x03 \x01(\tR\vgroupAvatar\x12\x1d\n" +
 	"\n" +
 	"group_type\x18\x04 \x01(\x05R\tgroupType\x12\x1b\n" +
-	"\tis_verify\x18\x05 \x01(\bR\bisVerify\"0\n" +
+	"\tis_verify\x18\x05 \x01(\bR\bisVerify\x12\x1a\n" +
+	"\bnickname\x18\x06 \x01(\tR\bnickname\"0\n" +
 	"\x13GroupCreateResponse\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"\xc2\x01\n" +
 	"\x0fGroupAddRequest\x12\x19\n" +
@@ -1626,9 +1651,10 @@ const file_apps_social_rpc_proto_social_proto_rawDesc = "" +
 	"joinSource\x12&\n" +
 	"\x0finviter_user_id\x18\x06 \x01(\tR\rinviterUserId\"-\n" +
 	"\x10GroupAddResponse\x12\x19\n" +
-	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"0\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"I\n" +
 	"\x13GroupAddListRequest\x12\x19\n" +
-	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"S\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"S\n" +
 	"\x14GroupAddListResponse\x12;\n" +
 	"\x0egroup_requests\x18\x01 \x03(\v2\x14.social.GroupRequestR\rgroupRequests\"\x8a\x01\n" +
 	"\x16GroupAddHandlerRequest\x12\x0e\n" +
@@ -1642,9 +1668,10 @@ const file_apps_social_rpc_proto_social_proto_rawDesc = "" +
 	"\x10GroupListRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\":\n" +
 	"\x11GroupListResponse\x12%\n" +
-	"\x06groups\x18\x01 \x03(\v2\r.social.GroupR\x06groups\"3\n" +
+	"\x06groups\x18\x01 \x03(\v2\r.social.GroupR\x06groups\"L\n" +
 	"\x16GroupMemberListRequest\x12\x19\n" +
-	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"S\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"S\n" +
 	"\x17GroupMemberListResponse\x128\n" +
 	"\rgroup_members\x18\x01 \x03(\v2\x13.social.GroupMemberR\fgroupMembers2\xf7\x05\n" +
 	"\rSocialService\x12@\n" +

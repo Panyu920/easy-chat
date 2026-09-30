@@ -66,6 +66,7 @@ func (l *GroupCreateLogic) GroupCreate(in *social.GroupCreateRequest) (*social.G
 			JoinSource: 0,
 			RoleLevel:  int64(constant.Owner),
 			JoinTime:   time.Now(),
+			Nickname:   in.Nickname,
 		})
 		if err != nil {
 			return err

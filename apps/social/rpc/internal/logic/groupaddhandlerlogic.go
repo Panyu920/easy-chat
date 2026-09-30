@@ -25,7 +25,9 @@ type GroupAddHandlerLogic struct {
 var (
 	ErrGroupRequestNotExist    = xerr.New(xerr.SERVER_COMMON_ERROR, "群加入处理请求不存在")
 	ErrGroupRequestStatusError = xerr.New(xerr.SERVER_COMMON_ERROR, "群加入处理请求状态错误")
+	ErrGroupRequestHasHanled   = xerr.New(xerr.SERVER_COMMON_ERROR, "群加入处理请求已处理")
 	ErrGroupRequestAuthError   = xerr.New(xerr.SERVER_COMMON_ERROR, "群加入处理请求权限错误")
+	ErrGroupIDInvalid          = xerr.New(xerr.SERVER_COMMON_ERROR, "群ID无效")
 )
 
 func NewGroupAddHandlerLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupAddHandlerLogic {
@@ -40,6 +42,7 @@ func NewGroupAddHandlerLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 func (l *GroupAddHandlerLogic) GroupAddHandler(in *social.GroupAddHandlerRequest) (*social.GroupAddHandlerResponse, error) {
 	// todo: add your logic here and delete this line
 	// 1. 检查群加入处理请求是否存在
+	println("in.Id", in.Id)
 	req, err := l.svcCtx.GroupRequestsModel.FindOne(l.ctx, in.Id)
 	if err != nil {
 		if err == socialmodels.ErrNotFound {
@@ -48,12 +51,14 @@ func (l *GroupAddHandlerLogic) GroupAddHandler(in *social.GroupAddHandlerRequest
 		return nil, errors.Wrapf(xerr.NewDBError(), "查询群加入处理请求失败 err %v, id %v", err, in.Id)
 	}
 	if req.GroupId != in.GroupId {
-		return nil, errors.WithStack(ErrGroupRequestAuthError)
+		println("req.GroupId", req.GroupId)
+		println("in.GroupId", in.GroupId)
+		return nil, errors.WithStack(ErrGroupIDInvalid)
 	}
 
 	// 2. 检查群加入处理请求状态是否为待处理
 	if req.ReqStatus != int64(constant.NoHandle) {
-		return nil, errors.WithStack(ErrFriendRequestStatusError)
+		return nil, errors.WithStack(ErrGroupRequestHasHanled)
 	}
 	// 3. 处理人是否为管理员或群主
 	member, err := l.svcCtx.GroupMembersModel.FindOneByGroupIdUserId(l.ctx, in.GroupId, in.HandlerUserId)

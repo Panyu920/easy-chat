@@ -110,6 +110,7 @@ message GroupCreateRequest{
     string group_avatar = 3;
     int32 group_type = 4; // 群类型 0:普通群 1:密聊群
     bool is_verify = 5; // 是否需要验证
+    string nickname = 6; // 群成员昵称
 }
 
 message GroupCreateResponse{
@@ -132,6 +133,7 @@ message GroupAddResponse{
 
 message GroupAddListRequest{
     string group_id = 1;
+    string user_id = 2;
 }
 
 message GroupAddListResponse {
@@ -160,6 +162,7 @@ message GroupListResponse {
 
 message GroupMemberListRequest{
     string group_id = 1;
+    string user_id = 2;
 }
 message GroupMemberListResponse {
     repeated GroupMember group_members = 1;

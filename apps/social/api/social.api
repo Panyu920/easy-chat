@@ -94,9 +94,9 @@ type (
 	GroupAddReq {
 		GroupId       string `json:"group_id"`
 		ReqMsg        string `json:"req_msg"`
-		ReqTime       int64  `json:"req_time"`
-		JoinSource    int32  `json:"join_source"`
-		InviterUserId string `json:"inviter_user_id"`
+		ReqTime       int64  `json:"req_time,optional"`
+		JoinSource    int32  `json:"join_source,optional"`
+		InviterUserId string `json:"inviter_user_id,optional"`
 	}
 	GroupAddResp {
 		GroupId string `json:"group_id"`

@@ -47,3 +47,6 @@ run_social_api:
 
 run_all_test:
 	@make run_user_rpc run_user_api run_social_rpc
+
+clear_redis:
+	docker exec redis redis-cli -a easy-chat --no-auth-warning FLUSHDB ASYNC

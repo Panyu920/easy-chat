@@ -1,5 +1,4 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
--- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: MySQL
 -- Generated at: 2026-09-27T06:27:43.934Z
 
@@ -52,6 +51,7 @@ CREATE TABLE `group_members` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '群组成员ID',
   `group_id` varchar(32) NOT NULL COMMENT '群组ID',
   `user_id` varchar(24) NOT NULL COMMENT '用户ID',
+  `nickname` varchar(255) NOT NULL COMMENT '昵称',
   `join_time` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '加入时间',
   `join_source` tinyint NOT NULL DEFAULT 0 COMMENT '加入群组来源(0: 群组邀请,1: 群组添加)',
   `role_level` tinyint NOT NULL DEFAULT 0 COMMENT '角色等级(0: 普通成员,1: 管理员,2: 群主)',
