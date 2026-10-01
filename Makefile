@@ -43,7 +43,11 @@ run_social_rpc:
 	@make -f ./deploy/mk/social_rpc.mk run-test
 
 run_social_api:
-	@make -f ./deploy/mk/social_api.mk run-test
+	@make -f ./deploy/mk/social_api.mk run-tes
+
+run_im_ws:
+	@make -f ./deploy/mk/im_ws.mk run-test
+
 
 run_all_test:
 	@make run_user_rpc run_user_api run_social_rpc
