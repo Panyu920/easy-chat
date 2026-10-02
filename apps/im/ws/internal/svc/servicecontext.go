@@ -1,17 +1,19 @@
 package svc
 
-import "easy-chat/apps/im/ws/internal/config"
+import (
+	immodel "easy-chat/apps/im/im_model"
+	"easy-chat/apps/im/ws/internal/config"
+)
 
 type ServiceContext struct {
 	Config config.Config
 
-	JWTAuth struct {
-		Secret string
-	}
+	immodel.ChatLogModel
 }
 
 func NewServiceContext(c *config.Config) *ServiceContext {
 	return &ServiceContext{
-		Config: *c,
+		Config:       *c,
+		ChatLogModel: immodel.NewChatLogModel(c.Mongo.Url, c.Mongo.Db, c.Mongo.Collection),
 	}
 }

@@ -1,0 +1,13 @@
+{
+    "frame_type": 1,
+    "from_id": "1",
+    "method": "conversation.chat",
+    "data": {
+        "msg_type": 1,
+        "recv_id": "0000005000000001",
+        "msg":{
+            "content": "hello",
+            "msgType": 1
+        }
+    }
+}

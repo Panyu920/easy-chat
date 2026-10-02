@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"easy-chat/apps/im/ws/internal/handler/conversation"
 	"easy-chat/apps/im/ws/internal/handler/user"
 	"easy-chat/apps/im/ws/internal/svc"
 	"easy-chat/apps/im/ws/websocketx"
@@ -12,6 +13,10 @@ func RegisterRoutes(server *websocketx.Server, ctx *svc.ServiceContext) {
 			{
 				Method:  "user.online",
 				Handler: user.SendOnline(ctx),
+			},
+			{
+				Method:  "conversation.chat",
+				Handler: conversation.Chat(ctx),
 			},
 		},
 	)

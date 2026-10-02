@@ -15,6 +15,7 @@ type Connection struct {
 	idleAt              time.Time
 	maxConnIdleDuration time.Duration
 	s                   *Server
+	userID              string
 
 	done    chan struct{}
 	msgChan chan []byte
@@ -94,7 +95,7 @@ func (c *Connection) ReadMessage() error {
 			handler(c.s, c, &message)
 		} else {
 			c.s.Errorf("Unknown method: %s", message.Method)
-			msg := NewMessage(MessageTypePing, message.Method, message.FromID, "unknown_method")
+			msg := NewMessage(FrameTypePing, message.Method, message.FromID, "unknown_method")
 			data, err := json.Marshal(msg)
 			if err != nil {
 				c.s.Errorf("Failed to marshal message: %v", err)
@@ -132,4 +133,8 @@ func (c *Connection) updateIdleAt() {
 	c.idleLock.Lock()
 	c.idleAt = time.Now()
 	c.idleLock.Unlock()
+}
+
+func (c *Connection) GetUserID() string {
+	return c.userID
 }

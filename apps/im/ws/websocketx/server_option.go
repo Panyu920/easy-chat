@@ -13,7 +13,7 @@ func newServerOptions(opts ...ServerOptions) *serverOption {
 	defaultOpt := &serverOption{
 		pattern:             "/ws",
 		auth:                &DefaultAuth{},
-		maxConnIdleDuration: 10 * time.Second,
+		maxConnIdleDuration: 10000 * time.Second,
 	}
 
 	for _, opt := range opts {

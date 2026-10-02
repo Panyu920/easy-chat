@@ -1,24 +1,24 @@
 package websocketx
 
-type MessageType uint8
+type FrameType uint8
 
 const (
-	MessageTypeData MessageType = iota + 1
-	MessageTypePing
+	FrameTypeData FrameType = iota + 1
+	FrameTypePing
 )
 
 type Message struct {
-	MsgType MessageType `json:"msg_type"`
-	Method  string      `json:"method"`
-	FromID  string      `json:"from_id"`
-	Data    any         `json:"data"`
+	FrameType FrameType `json:"frame_type"`
+	Method    string    `json:"method"`
+	FromID    string    `json:"from_id"`
+	Data      any       `json:"data"`
 }
 
-func NewMessage(msgType MessageType, method string, fromID string, data any) *Message {
+func NewMessage(frameType FrameType, method string, fromID string, data any) *Message {
 	return &Message{
-		MsgType: msgType,
-		Method:  method,
-		FromID:  fromID,
-		Data:    data,
+		FrameType: frameType,
+		Method:    method,
+		FromID:    fromID,
+		Data:      data,
 	}
 }

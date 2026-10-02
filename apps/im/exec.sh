@@ -1,0 +1,1 @@
+goctl model mongo --type ChatLog --dir "./apps/im/im_model"  

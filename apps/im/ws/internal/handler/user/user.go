@@ -11,7 +11,7 @@ func SendOnline(svc *svc.ServiceContext) websocketx.HandlerFunc {
 
 		currentUserIds := server.GetUsers(conn)
 
-		err := server.SendToUser(websocketx.NewMessage(msg.MsgType, msg.Method, currentUserIds[0], msg.Data), userIds...)
+		err := server.SendToUser(websocketx.NewMessage(msg.FrameType, msg.Method, currentUserIds[0], msg.Data), userIds...)
 		server.Logger.Error(err)
 	}
 }

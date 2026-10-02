@@ -67,6 +67,9 @@ func (s *Server) ServerWs(w http.ResponseWriter, r *http.Request) {
 	}
 	// 添加连接
 	s.AddConn(connection, r)
+	// 设置用户ID
+	connection.userID = s.auth.GetUserID(r)
+
 	// 异步处理 WebSocket 连接
 	go s.HandleConn(connection)
 }
@@ -87,6 +90,9 @@ func (s *Server) AddConn(conn *Connection, r *http.Request) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 	user := s.auth.GetUserID(r)
+	if conn, ok := s.userToConn[user]; ok {
+		conn.Close()
+	}
 	s.connToUser[conn] = user
 	s.userToConn[user] = conn
 }
@@ -169,11 +175,11 @@ func (s *Server) SendToUser(msg any, user ...string) error {
 }
 
 func (s *Server) closeConn(conn *Connection) {
-	conn.Close()
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
-	delete(s.connToUser, conn)
 	delete(s.userToConn, s.connToUser[conn])
+	delete(s.connToUser, conn)
+	conn.Close()
 }
 
 func (s *Server) Start() {
