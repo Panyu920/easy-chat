@@ -23,8 +23,9 @@ func main() {
 		panic(err)
 	}
 	ctx := svc.NewServiceContext(&c)
+	auth := handler.NewJWTAuth(ctx)
 
-	server := websocketx.NewServer(c.ListenOn)
+	server := websocketx.NewServer(c.ListenOn, websocketx.WithServerAuthOption(auth))
 	handler.RegisterRoutes(&server, ctx)
 
 	fmt.Printf("im ws start %s", c.ListenOn)

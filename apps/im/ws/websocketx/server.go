@@ -50,18 +50,18 @@ func (s *Server) ServerWs(w http.ResponseWriter, r *http.Request) {
 			s.Errorf("Panic in ServerWs: %v", r)
 		}
 	}()
-	// 验证认证
-	if !s.auth.Auth(w, r) {
-		s.Errorf("Auth failed")
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Auth failed"))
-		return
-	}
 
 	// 升级为 WebSocket 连接
 	conn, err := s.Upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		s.Errorf("Failed to upgrade WebSocket connection: %v", err)
+		return
+	}
+	// 验证认证
+	if !s.auth.Auth(w, r) {
+		s.Errorf("Auth failed")
+		s.Send("Auth failed", conn)
+		s.closeConn(conn)
 		return
 	}
 	// 添加连接
@@ -107,7 +107,7 @@ func (s *Server) RegisterRoutes(route []*Route) {
 func (s *Server) AddConn(conn *websocket.Conn, r *http.Request) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
-	user := s.auth.GetUser(r)
+	user := s.auth.GetUserID(r)
 	s.connToUser[conn] = user
 	s.userToConn[user] = conn
 }

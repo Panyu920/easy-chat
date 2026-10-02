@@ -18,3 +18,9 @@ func newServerOptions(opts ...ServerOptions) *serverOption {
 
 	return defaultOpt
 }
+
+func WithServerAuthOption(auth IAuth) ServerOptions {
+	return func(opt *serverOption) {
+		opt.auth = auth
+	}
+}
