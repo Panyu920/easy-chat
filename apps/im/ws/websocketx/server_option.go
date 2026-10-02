@@ -1,15 +1,19 @@
 package websocketx
 
+import "time"
+
 type ServerOptions func(*serverOption)
 type serverOption struct {
-	pattern string
-	auth    IAuth
+	pattern             string
+	auth                IAuth
+	maxConnIdleDuration time.Duration
 }
 
 func newServerOptions(opts ...ServerOptions) *serverOption {
 	defaultOpt := &serverOption{
-		pattern: "/ws",
-		auth:    &DefaultAuth{},
+		pattern:             "/ws",
+		auth:                &DefaultAuth{},
+		maxConnIdleDuration: 10 * time.Second,
 	}
 
 	for _, opt := range opts {

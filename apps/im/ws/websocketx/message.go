@@ -1,14 +1,24 @@
 package websocketx
 
+type MessageType uint8
+
+const (
+	MessageTypeData MessageType = iota + 1
+	MessageTypePing
+)
+
 type Message struct {
-	Method string `json:"method"`
-	FromID string `json:"from_id"`
-	Data   any    `json:"data"`
+	MsgType MessageType `json:"msg_type"`
+	Method  string      `json:"method"`
+	FromID  string      `json:"from_id"`
+	Data    any         `json:"data"`
 }
 
-func NewMessage(fromID string, data any) *Message {
+func NewMessage(msgType MessageType, method string, fromID string, data any) *Message {
 	return &Message{
-		FromID: fromID,
-		Data:   data,
+		MsgType: msgType,
+		Method:  method,
+		FromID:  fromID,
+		Data:    data,
 	}
 }

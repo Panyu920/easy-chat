@@ -21,8 +21,8 @@ type Server struct {
 	auth   IAuth
 
 	mtx        sync.RWMutex
-	connToUser map[*websocket.Conn]string
-	userToConn map[string]*websocket.Conn
+	connToUser map[*Connection]string
+	userToConn map[string]*Connection
 	serverOpt  *serverOption
 }
 
@@ -38,8 +38,8 @@ func NewServer(addr string, opts ...ServerOptions) Server {
 		auth:      opt.auth,
 		serverOpt: opt,
 
-		connToUser: make(map[*websocket.Conn]string),
-		userToConn: make(map[string]*websocket.Conn),
+		connToUser: make(map[*Connection]string),
+		userToConn: make(map[string]*Connection),
 	}
 }
 
@@ -57,45 +57,24 @@ func (s *Server) ServerWs(w http.ResponseWriter, r *http.Request) {
 		s.Errorf("Failed to upgrade WebSocket connection: %v", err)
 		return
 	}
+	connection := NewConnection(s, conn, s.serverOpt.maxConnIdleDuration)
 	// 验证认证
 	if !s.auth.Auth(w, r) {
 		s.Errorf("Auth failed")
-		s.Send("Auth failed", conn)
-		s.closeConn(conn)
+		s.Send("Auth failed", connection)
+		s.closeConn(connection)
 		return
 	}
 	// 添加连接
-	s.AddConn(conn, r)
+	s.AddConn(connection, r)
 	// 异步处理 WebSocket 连接
-	go s.HandleConn(conn)
+	go s.HandleConn(connection)
 }
 
-func (s *Server) HandleConn(conn *websocket.Conn) {
+func (s *Server) HandleConn(conn *Connection) {
 	// 处理 WebSocket 消息
-	for {
-		_, msg, err := conn.ReadMessage()
-		if err != nil {
-			s.Errorf("Failed to read message from WebSocket connection: %v", err)
-			// 关闭连接
-			s.closeConn(conn)
-			return
-		}
-
-		var message Message
-		if err := json.Unmarshal(msg, &message); err != nil {
-			s.Errorf("Failed to parse message: %v, message: %s", err, string(msg))
-			// 关闭连接
-			s.closeConn(conn)
-			return
-		}
-		// 调用路由处理函数
-		if handler, ok := s.routes[message.Method]; ok {
-			handler(s, conn, &message)
-		} else {
-			s.Errorf("Unknown method: %s", message.Method)
-			conn.WriteMessage(websocket.TextMessage, fmt.Appendf(nil, "Unknown method, please check the method %s", message.Method))
-		}
-	}
+	go conn.WriteMessage()
+	conn.ReadMessage()
 }
 
 func (s *Server) RegisterRoutes(route []*Route) {
@@ -104,7 +83,7 @@ func (s *Server) RegisterRoutes(route []*Route) {
 	}
 }
 
-func (s *Server) AddConn(conn *websocket.Conn, r *http.Request) {
+func (s *Server) AddConn(conn *Connection, r *http.Request) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 	user := s.auth.GetUserID(r)
@@ -112,7 +91,7 @@ func (s *Server) AddConn(conn *websocket.Conn, r *http.Request) {
 	s.userToConn[user] = conn
 }
 
-func (s *Server) GetConn(user string) (*websocket.Conn, error) {
+func (s *Server) GetConn(user string) (*Connection, error) {
 	s.mtx.RLock()
 	defer s.mtx.RUnlock()
 	conn, ok := s.userToConn[user]
@@ -122,7 +101,7 @@ func (s *Server) GetConn(user string) (*websocket.Conn, error) {
 	return conn, nil
 }
 
-func (s *Server) GetUser(conn *websocket.Conn) (string, error) {
+func (s *Server) GetUser(conn *Connection) (string, error) {
 	s.mtx.RLock()
 	defer s.mtx.RUnlock()
 	user, ok := s.connToUser[conn]
@@ -132,10 +111,10 @@ func (s *Server) GetUser(conn *websocket.Conn) (string, error) {
 	return user, nil
 }
 
-func (s *Server) GetConns(users ...string) []*websocket.Conn {
+func (s *Server) GetConns(users ...string) []*Connection {
 	s.mtx.RLock()
 	defer s.mtx.RUnlock()
-	var conns = make([]*websocket.Conn, 0, len(users))
+	var conns = make([]*Connection, 0, len(users))
 	for _, user := range users {
 		conn, ok := s.userToConn[user]
 		if ok {
@@ -145,7 +124,7 @@ func (s *Server) GetConns(users ...string) []*websocket.Conn {
 	return conns
 }
 
-func (s *Server) GetUsers(conns ...*websocket.Conn) []string {
+func (s *Server) GetUsers(conns ...*Connection) []string {
 	s.mtx.RLock()
 	defer s.mtx.RUnlock()
 	if len(conns) == 0 {
@@ -167,17 +146,18 @@ func (s *Server) GetUsers(conns ...*websocket.Conn) []string {
 	return users
 }
 
-func (s *Server) Send(msg any, conns ...*websocket.Conn) error {
+func (s *Server) Send(msg any, conns ...*Connection) error {
 	if len(conns) == 0 {
 		return nil
 	}
 
 	data, err := json.Marshal(msg)
 	if err != nil {
+		s.Errorf("Failed to marshal message: %v", err)
 		return err
 	}
 	for _, conn := range conns {
-		if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
+		if err := conn.SendMessageToChan(data); err != nil {
 			return err
 		}
 	}
@@ -188,7 +168,7 @@ func (s *Server) SendToUser(msg any, user ...string) error {
 	return s.Send(msg, conns...)
 }
 
-func (s *Server) closeConn(conn *websocket.Conn) {
+func (s *Server) closeConn(conn *Connection) {
 	conn.Close()
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
