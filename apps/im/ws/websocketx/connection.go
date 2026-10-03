@@ -76,6 +76,13 @@ func (c *Connection) ReadMessage() error {
 	for {
 		_, data, err := c.conn.ReadMessage()
 		if err != nil {
+			if errClose, ok := err.(*websocket.CloseError); ok {
+				// 客户端关闭连接
+				c.s.Errorf("client userId %v close: %v, err: %v", c.userID, errClose.Code, errClose.Text)
+				// 关闭连接
+				c.s.closeConn(c)
+				return errClose
+			}
 			c.s.Errorf("Failed to read message from WebSocket connection: %v", err)
 			// 关闭连接
 			c.s.closeConn(c)
