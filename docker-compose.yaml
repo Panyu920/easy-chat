@@ -4,3 +4,4 @@ include:
   - './deploy/docker_compose/mysql.yaml'
   - './deploy/docker_compose/common.yaml'
   - './deploy/docker_compose/mongo.yaml'
+  - './deploy/docker_compose/kafka.yaml'
