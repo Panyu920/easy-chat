@@ -25,6 +25,10 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 	ctx := svc.NewServiceContext(c)
+	// 设置系统根用户
+	if err := ctx.SetSystemRootToken(); err != nil {
+		panic(err)
+	}
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		user.RegisterUserServiceServer(grpcServer, server.NewUserServiceServer(ctx))
