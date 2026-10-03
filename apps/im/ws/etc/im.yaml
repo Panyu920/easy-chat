@@ -20,3 +20,7 @@ Mongo:
   Url: mongodb://root:easy-chat@192.168.1.5:47017
   Db: easy_chat
   Collection: chat_log
+
+MqTransfer:
+  Host: 192.168.1.5:9092
+  Topic: msgChatTransfer

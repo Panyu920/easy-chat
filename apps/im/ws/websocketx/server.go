@@ -102,6 +102,7 @@ func (s *Server) GetConn(user string) (*Connection, error) {
 	defer s.mtx.RUnlock()
 	conn, ok := s.userToConn[user]
 	if !ok {
+		s.Logger.Errorf("user %s not found", user)
 		return nil, fmt.Errorf("user %s not found", user)
 	}
 	return conn, nil

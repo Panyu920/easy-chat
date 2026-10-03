@@ -44,7 +44,7 @@ func (c *ConversationLogic) SingleChat(data *msgtype.Chat, userId string) error 
 		MsgType:        data.MsgType,
 		MsgContent:     data.Content,
 		SendTime:       time.Now().Unix(),
-		MsgFrom:        0,
+		FrameFrom:      userId,
 		Status:         0,
 	})
 	if err != nil {

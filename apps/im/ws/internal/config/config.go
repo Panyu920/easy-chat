@@ -15,4 +15,8 @@ type Config struct {
 		Db         string
 		Collection string
 	}
+	MqTransfer struct {
+		Host  string
+		Topic string
+	}
 }

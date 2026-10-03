@@ -22,3 +22,10 @@ func NewMessage(frameType FrameType, method string, fromID string, data any) *Me
 		Data:      data,
 	}
 }
+
+func NewErrMessage(data string) Message {
+	return Message{
+		FrameType: FrameTypeData,
+		Data:      data,
+	}
+}

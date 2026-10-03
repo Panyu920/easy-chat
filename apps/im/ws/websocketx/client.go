@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/gorilla/websocket"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type Client interface {
@@ -50,6 +51,7 @@ func (c *client) Send(v any) error {
 	}
 	err = c.conn.WriteMessage(websocket.TextMessage, data)
 	if err == nil {
+		logx.Infof("Send message to %s success", data)
 		return nil
 	}
 

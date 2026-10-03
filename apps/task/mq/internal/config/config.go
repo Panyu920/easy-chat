@@ -14,8 +14,9 @@ type Config struct {
 
 	Redisx redis.RedisConf
 	Mongo  struct {
-		Url string
-		Db  string
+		Url        string
+		Db         string
+		Collection string
 	}
 
 	Ws struct {
