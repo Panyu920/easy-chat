@@ -2,6 +2,7 @@ package websocketx
 
 import (
 	"context"
+	"easy-chat/pkg/mycache"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -24,6 +25,8 @@ type Server struct {
 	connToUser map[*Connection]string
 	userToConn map[string]*Connection
 	serverOpt  *serverOption
+
+	MsgCache *mycache.LRUCache
 }
 
 func NewServer(addr string, opts ...ServerOptions) Server {
@@ -40,6 +43,8 @@ func NewServer(addr string, opts ...ServerOptions) Server {
 
 		connToUser: make(map[*Connection]string),
 		userToConn: make(map[string]*Connection),
+
+		MsgCache: mycache.NewLRUCache(10000),
 	}
 }
 
@@ -69,6 +74,8 @@ func (s *Server) ServerWs(w http.ResponseWriter, r *http.Request) {
 	s.AddConn(connection, r)
 	// 设置用户ID
 	connection.userID = s.auth.GetUserID(r)
+
+	s.Infof("user %s login \n ", connection.userID)
 
 	// 异步处理 WebSocket 连接
 	go s.HandleConn(connection)

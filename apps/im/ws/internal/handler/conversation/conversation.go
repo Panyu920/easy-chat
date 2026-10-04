@@ -6,6 +6,7 @@ import (
 	"easy-chat/apps/im/ws/websocketx"
 	"easy-chat/apps/task/mq/mqtype"
 	"easy-chat/pkg/constant"
+	"fmt"
 
 	"github.com/mitchellh/mapstructure"
 )
@@ -26,6 +27,21 @@ func Chat(svc *svc.ServiceContext) websocketx.HandlerFunc {
 			return
 		}
 		userID := conn.GetUserID()
+		combineKey := fmt.Sprintf("%s_%s", userID, msg.ClientMsgId)
+		_, ok := server.MsgCache.Get(combineKey)
+		if ok {
+			// 消息已处理，直接返回成功
+			server.Logger.Info("msg is cached", combineKey)
+			server.Send(websocketx.NewAckMessage(websocketx.Result{
+				ClientMsgId: msg.ClientMsgId,
+				Status:      "success",
+				Seq:         msg.Seq,
+			}), conn)
+			return
+		} else {
+			// cache 消息
+			// 查数据库消息
+		}
 
 		switch chatData.ChatType {
 		case constant.ChatTypeSingle:
@@ -48,6 +64,16 @@ func Chat(svc *svc.ServiceContext) websocketx.HandlerFunc {
 				server.Send(websocketx.NewErrMessage("push chat to mq failed"), conn)
 				return
 			}
+
+			// 缓存消息
+			server.MsgCache.Put(combineKey, struct{}{})
+			// 消息已处理，直接返回成功
+			server.Logger.Info("msg is cached", combineKey)
+			server.Send(websocketx.NewAckMessage(websocketx.Result{
+				ClientMsgId: msg.ClientMsgId,
+				Status:      "success",
+				Seq:         msg.Seq,
+			}), conn)
 			// 存储聊天记录
 			// err := logic.NewConversationLogic(context.Background(), svc, server).SingleChat(&chatData, conn.GetUserID())
 			// if err != nil {

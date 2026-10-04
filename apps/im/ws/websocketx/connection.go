@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -14,8 +15,12 @@ type Connection struct {
 	idleLock            sync.Locker     // 空闲锁
 	idleAt              time.Time
 	maxConnIdleDuration time.Duration
+	CurrentAckSqe       uint32
 	s                   *Server
 	userID              string
+
+	needHanldeMsgMap map[uuid.UUID]*Message
+	msgLock          sync.Locker
 
 	done    chan struct{}
 	msgChan chan []byte
@@ -97,18 +102,25 @@ func (c *Connection) ReadMessage() error {
 			c.s.closeConn(c)
 			return err
 		}
-		// 调用路由处理函数
-		if handler, ok := c.s.routes[message.Method]; ok {
-			handler(c.s, c, &message)
-		} else {
-			c.s.Errorf("Unknown method: %s", message.Method)
-			msg := NewMessage(FrameTypePing, message.Method, message.FromID, "unknown_method")
-			data, err := json.Marshal(msg)
-			if err != nil {
-				c.s.Errorf("Failed to marshal message: %v", err)
-				continue
+		switch message.FrameType {
+		case FrameTypePing:
+		case FrameTypeData:
+			{
+
+				// 调用路由处理函数
+				if handler, ok := c.s.routes[message.Method]; ok {
+					handler(c.s, c, &message)
+				} else {
+					c.s.Errorf("Unknown method: %s", message.Method)
+					msg := NewMessage(FrameTypePing, message.Method, message.FromID, "unknown_method")
+					data, err := json.Marshal(msg)
+					if err != nil {
+						c.s.Errorf("Failed to marshal message: %v", err)
+						continue
+					}
+					c.SendMessageToChan(data)
+				}
 			}
-			c.SendMessageToChan(data)
 		}
 	}
 }
@@ -144,4 +156,25 @@ func (c *Connection) updateIdleAt() {
 
 func (c *Connection) GetUserID() string {
 	return c.userID
+}
+
+func (c *Connection) AddNeedHandleMsg(msg *Message) bool {
+	c.msgLock.Lock()
+	defer c.msgLock.Unlock()
+	currentMsg, ok := c.needHanldeMsgMap[msg.ClientMsgId]
+	// 1.msg 有server_msg_id, map 中不存在 ,消息已处理
+	if msg.ServerMsgId != uuid.Nil && !ok {
+		return false
+	}
+	// 2.msg 有server_msg_id, map 中存在, server_msg_id 相同, 更新, 不同, 重新发送
+	// 3.msg 没有server_msg_id,map 中不存在, 直接添加
+	// 4.msg 没有server_msg_id,map 中存在,重新发送
+	if ok {
+		// 已存在, 只更新
+		msg.ServerMsgId = currentMsg.ServerMsgId
+		c.needHanldeMsgMap[msg.ClientMsgId] = msg
+		return true
+	} else {
+		return false
+	}
 }
