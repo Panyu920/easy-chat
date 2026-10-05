@@ -137,11 +137,11 @@ type Conversation struct {
 	IsShow         bool                   `protobuf:"varint,4,opt,name=is_show,json=isShow,proto3" json:"is_show,omitempty"`
 	Seq            int64                  `protobuf:"varint,5,opt,name=seq,proto3" json:"seq,omitempty"`
 	// 总消息数
-	Total int32 `protobuf:"varint,6,opt,name=total,proto3" json:"total,omitempty"`
+	// int32 total = 6;
 	// 未读消息数
-	ToRead int32 `protobuf:"varint,7,opt,name=to_read,json=toRead,proto3" json:"to_read,omitempty"`
+	// int32 to_read = 7;
 	// 已读消息
-	Read          int32    `protobuf:"varint,8,opt,name=read,proto3" json:"read,omitempty"`
+	ReadSeq       int64    `protobuf:"varint,8,opt,name=read_seq,json=readSeq,proto3" json:"read_seq,omitempty"`
 	Msg           *ChatLog `protobuf:"bytes,9,opt,name=msg,proto3" json:"msg,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -212,23 +212,9 @@ func (x *Conversation) GetSeq() int64 {
 	return 0
 }
 
-func (x *Conversation) GetTotal() int32 {
+func (x *Conversation) GetReadSeq() int64 {
 	if x != nil {
-		return x.Total
-	}
-	return 0
-}
-
-func (x *Conversation) GetToRead() int32 {
-	if x != nil {
-		return x.ToRead
-	}
-	return 0
-}
-
-func (x *Conversation) GetRead() int32 {
-	if x != nil {
-		return x.Read
+		return x.ReadSeq
 	}
 	return 0
 }
@@ -606,6 +592,7 @@ func (x *SetUpUserConversationReq) GetChatType() int32 {
 
 type SetUpUserConversationResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Conversation  *Conversation          `protobuf:"bytes,1,opt,name=conversation,proto3" json:"conversation,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -638,6 +625,13 @@ func (x *SetUpUserConversationResp) ProtoReflect() protoreflect.Message {
 // Deprecated: Use SetUpUserConversationResp.ProtoReflect.Descriptor instead.
 func (*SetUpUserConversationResp) Descriptor() ([]byte, []int) {
 	return file_apps_im_rpc_proto_im_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SetUpUserConversationResp) GetConversation() *Conversation {
+	if x != nil {
+		return x.Conversation
+	}
+	return nil
 }
 
 type CreateGroupConversationReq struct {
@@ -743,16 +737,14 @@ const file_apps_im_rpc_proto_im_proto_rawDesc = "" +
 	"msgContent\x12\x1b\n" +
 	"\tchat_type\x18\a \x01(\x05R\bchatType\x12\x1b\n" +
 	"\tsend_time\x18\b \x01(\x03R\bsendTime\x12!\n" +
-	"\fread_records\x18\t \x01(\fR\vreadRecords\"\xfa\x01\n" +
+	"\fread_records\x18\t \x01(\fR\vreadRecords\"\xd2\x01\n" +
 	"\fConversation\x12'\n" +
 	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\x12\x1b\n" +
 	"\tchat_type\x18\x02 \x01(\x05R\bchatType\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x17\n" +
 	"\ais_show\x18\x04 \x01(\bR\x06isShow\x12\x10\n" +
-	"\x03seq\x18\x05 \x01(\x03R\x03seq\x12\x14\n" +
-	"\x05total\x18\x06 \x01(\x05R\x05total\x12\x17\n" +
-	"\ato_read\x18\a \x01(\x05R\x06toRead\x12\x12\n" +
-	"\x04read\x18\b \x01(\x05R\x04read\x12\x1d\n" +
+	"\x03seq\x18\x05 \x01(\x03R\x03seq\x12\x19\n" +
+	"\bread_seq\x18\b \x01(\x03R\areadSeq\x12\x1d\n" +
 	"\x03msg\x18\t \x01(\v2\v.im.ChatLogR\x03msg\".\n" +
 	"\x13GetConversationsReq\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"\xca\x01\n" +
@@ -780,8 +772,9 @@ const file_apps_im_rpc_proto_im_proto_rawDesc = "" +
 	"\x18SetUpUserConversationReq\x12\x17\n" +
 	"\asend_id\x18\x01 \x01(\tR\x06sendId\x12\x17\n" +
 	"\arecv_id\x18\x02 \x01(\tR\x06recvId\x12\x1b\n" +
-	"\tchat_type\x18\x03 \x01(\x05R\bchatType\"\x1b\n" +
-	"\x19SetUpUserConversationResp\"T\n" +
+	"\tchat_type\x18\x03 \x01(\x05R\bchatType\"Q\n" +
+	"\x19SetUpUserConversationResp\x124\n" +
+	"\fconversation\x18\x01 \x01(\v2\x10.im.ConversationR\fconversation\"T\n" +
 	"\x1aCreateGroupConversationReq\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x1b\n" +
 	"\tcreate_id\x18\x02 \x01(\tR\bcreateId\"\x1d\n" +
@@ -828,23 +821,24 @@ var file_apps_im_rpc_proto_im_proto_depIdxs = []int32{
 	12, // 1: im.GetConversationsResp.conversation_list:type_name -> im.GetConversationsResp.ConversationListEntry
 	13, // 2: im.PutConversationsReq.conversation_list:type_name -> im.PutConversationsReq.ConversationListEntry
 	0,  // 3: im.GetChatLogResp.list:type_name -> im.ChatLog
-	1,  // 4: im.GetConversationsResp.ConversationListEntry.value:type_name -> im.Conversation
-	1,  // 5: im.PutConversationsReq.ConversationListEntry.value:type_name -> im.Conversation
-	6,  // 6: im.Im.GetChatLog:input_type -> im.GetChatLogReq
-	8,  // 7: im.Im.SetUpUserConversation:input_type -> im.SetUpUserConversationReq
-	2,  // 8: im.Im.GetConversations:input_type -> im.GetConversationsReq
-	4,  // 9: im.Im.PutConversations:input_type -> im.PutConversationsReq
-	10, // 10: im.Im.CreateGroupConversation:input_type -> im.CreateGroupConversationReq
-	7,  // 11: im.Im.GetChatLog:output_type -> im.GetChatLogResp
-	9,  // 12: im.Im.SetUpUserConversation:output_type -> im.SetUpUserConversationResp
-	3,  // 13: im.Im.GetConversations:output_type -> im.GetConversationsResp
-	5,  // 14: im.Im.PutConversations:output_type -> im.PutConversationsResp
-	11, // 15: im.Im.CreateGroupConversation:output_type -> im.CreateGroupConversationResp
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	1,  // 4: im.SetUpUserConversationResp.conversation:type_name -> im.Conversation
+	1,  // 5: im.GetConversationsResp.ConversationListEntry.value:type_name -> im.Conversation
+	1,  // 6: im.PutConversationsReq.ConversationListEntry.value:type_name -> im.Conversation
+	6,  // 7: im.Im.GetChatLog:input_type -> im.GetChatLogReq
+	8,  // 8: im.Im.SetUpUserConversation:input_type -> im.SetUpUserConversationReq
+	2,  // 9: im.Im.GetConversations:input_type -> im.GetConversationsReq
+	4,  // 10: im.Im.PutConversations:input_type -> im.PutConversationsReq
+	10, // 11: im.Im.CreateGroupConversation:input_type -> im.CreateGroupConversationReq
+	7,  // 12: im.Im.GetChatLog:output_type -> im.GetChatLogResp
+	9,  // 13: im.Im.SetUpUserConversation:output_type -> im.SetUpUserConversationResp
+	3,  // 14: im.Im.GetConversations:output_type -> im.GetConversationsResp
+	5,  // 15: im.Im.PutConversations:output_type -> im.PutConversationsResp
+	11, // 16: im.Im.CreateGroupConversation:output_type -> im.CreateGroupConversationResp
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_apps_im_rpc_proto_im_proto_init() }

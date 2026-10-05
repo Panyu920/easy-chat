@@ -21,6 +21,7 @@ type ChatLog struct {
 	MsgType        constant.MsgType  `bson:"msg_type"`
 	MsgContent     string            `bson:"msg_content"`
 	SendTime       int64             `bson:"send_time"`
+	Seq            int64             `bson:"seq"`
 	Status         int               `bson:"status"`
 
 	// TODO: Fill your own fields

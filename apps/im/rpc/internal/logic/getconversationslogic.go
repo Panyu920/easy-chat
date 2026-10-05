@@ -3,9 +3,12 @@ package logic
 import (
 	"context"
 
+	immodel "easy-chat/apps/im/im_model"
 	"easy-chat/apps/im/rpc/im"
 	"easy-chat/apps/im/rpc/internal/svc"
+	"easy-chat/pkg/xerr"
 
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,6 +29,56 @@ func NewGetConversationsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 // 获取会话
 func (l *GetConversationsLogic) GetConversations(in *im.GetConversationsReq) (*im.GetConversationsResp, error) {
 	// todo: add your logic here and delete this line
+	// 根据用户查询用户会话列表
+	data, err := l.svcCtx.ConversationsModel.FindByUserId(l.ctx, in.UserId)
+	if err != nil {
+		if err == immodel.ErrNotFound {
+			return &im.GetConversationsResp{}, nil
+		}
+		return nil, errors.Wrapf(xerr.NewDBError(), "ConversationsModel.FindByUserId err %v, req %v", err, in.UserId)
+	}
+	var res im.GetConversationsResp
+	// copier.Copy(&res, &data)
+	res.ConversationList = make(map[string]*im.Conversation, len(data.ConversationList))
+	for _, conversation := range data.ConversationList {
+		res.ConversationList[conversation.ConversationId] = convertDBConversationToRpcConversation(conversation)
+		res.ConversationList[conversation.ConversationId].UserId = in.UserId
+	}
 
-	return &im.GetConversationsResp{}, nil
+	ids := make([]string, 0, len(data.ConversationList))
+	for _, conversation := range data.ConversationList {
+		ids = append(ids, conversation.ConversationId)
+	}
+	conversations, err := l.svcCtx.ConversationModel.ListByConversationIds(l.ctx, ids)
+	if err != nil {
+		return nil, errors.Wrapf(xerr.NewDBError(), "ConversationModel.ListByConversationIds err %v, req %v", err, ids)
+	}
+
+	// 计算是否存在未读消息
+	for _, conversation := range conversations {
+		if _, ok := res.ConversationList[conversation.ConversationId]; !ok {
+			continue
+		}
+		// 用户读取的消息量
+		total := res.ConversationList[conversation.ConversationId].Seq
+		if total < conversation.Seq {
+			// 有新的消息
+			res.ConversationList[conversation.ConversationId].Seq = conversation.Seq
+			// 有多少是未读
+			res.ConversationList[conversation.ConversationId].ReadSeq = total
+
+			// 更改当前会话为显示状态
+			res.ConversationList[conversation.ConversationId].IsShow = true
+		}
+	}
+
+	return &res, nil
+}
+
+func convertDBConversationToRpcConversation(dbConversation *immodel.Conversation) *im.Conversation {
+	return &im.Conversation{
+		ConversationId: dbConversation.ConversationId,
+		ChatType:       int32(dbConversation.ChatType),
+		Seq:            dbConversation.Seq,
+	}
 }

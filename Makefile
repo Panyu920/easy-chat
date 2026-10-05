@@ -51,6 +51,10 @@ run_im_ws:
 run_task_mq:
 	@make -f ./deploy/mk/task_mq.mk run-test
 
+run_im_rpc:
+	@make -f ./deploy/mk/im_rpc.mk run-test
+
+
 run_all_test:
 	@make run_user_rpc run_user_api run_social_rpc
 
