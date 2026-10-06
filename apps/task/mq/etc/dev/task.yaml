@@ -18,7 +18,8 @@ Redisx:
 Mongo:
   Url: "mongodb://root:easy-chat@192.168.1.5:47017"
   Db: easy-chat
-  Collection: easy_chat
-
+  ChatLogCollection: chat_log
+  ConversationCollection: conversation
+  ConversationsCollection: conversations
 Ws:
   Host: 127.0.0.1:10003

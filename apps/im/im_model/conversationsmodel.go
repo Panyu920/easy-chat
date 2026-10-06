@@ -2,10 +2,12 @@ package immodel
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/stores/mon"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 var _ ConversationsModel = (*customConversationsModel)(nil)
@@ -17,6 +19,7 @@ type (
 		conversationsModel
 		FindByUserId(ctx context.Context, userId string) (*Conversations, error)
 		InsertMany(ctx context.Context, data ...*Conversations) error
+		UpdateOneConversation(ctx context.Context, data *Conversations, conversationId string) (*mongo.UpdateResult, error)
 	}
 
 	customConversationsModel struct {
@@ -65,4 +68,28 @@ func (m *customConversationsModel) InsertMany(ctx context.Context, data ...*Conv
 		return err
 	}
 	return nil
+}
+
+func (m *defaultConversationsModel) UpdateOneConversation(ctx context.Context, data *Conversations, conversationId string) (*mongo.UpdateResult, error) {
+	data.UpdateAt = time.Now()
+
+	conv, ok := data.ConversationList[conversationId]
+	if !ok {
+		return nil, errors.New("conversation not found in data")
+	}
+
+	res, err := m.conn.UpdateOne(ctx,
+		bson.M{"user_id": data.UserId},
+		bson.M{"$set": bson.M{
+			"conversation_list." + conversationId: conv, // ← 点号 + key
+			"update_at":                           data.UpdateAt,
+		}},
+	)
+	if err != nil {
+		return nil, err
+	}
+	if res.MatchedCount == 0 {
+		return res, ErrNotFound
+	}
+	return res, nil
 }

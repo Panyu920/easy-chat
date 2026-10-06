@@ -14,6 +14,7 @@ type (
 		SendId         string            `mapstructure:"send_id" json:"send_id"`
 		RecvId         string            `mapstructure:"recv_id" json:"recv_id"`
 		SendTime       int64             `mapstructure:"send_time" json:"send_time"`
+		Seq            int64             `mapstructure:"seq" json:"seq"`
 		Msg            `mapstructure:"msg" json:"msg"`
 	}
 	Push struct {

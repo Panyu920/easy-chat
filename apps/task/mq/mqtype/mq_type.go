@@ -11,4 +11,5 @@ type MqChatType struct {
 	SendTime       int64             `json:"send_time"`
 	MsgType        constant.MsgType  `json:"msg_type"`
 	Content        string            `json:"content"`
+	Seq            int64             `json:"seq"`
 }

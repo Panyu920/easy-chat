@@ -15,12 +15,12 @@ const (
 type Result struct {
 	ClientMsgId uuid.UUID
 	Status      string
-	Seq         uint32
+	Seq         int64
 }
 
 type Message struct {
 	FrameType   FrameType `json:"frame_type"`
-	Seq         uint32    `json:"seq"`
+	Seq         int64     `json:"seq"`
 	Method      string    `json:"method"`
 	FromID      string    `json:"from_id"`
 	ClientMsgId uuid.UUID `json:"client_msg_id"`

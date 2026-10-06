@@ -11,17 +11,21 @@ import (
 )
 
 type ServiceContext struct {
-	Config       *config.Config
-	Redisx       *redis.Redis
-	WsClient     websocketx.Client
-	ChatLogModel immodel.ChatLogModel
+	Config             *config.Config
+	Redisx             *redis.Redis
+	WsClient           websocketx.Client
+	ChatLogModel       immodel.ChatLogModel
+	ConversationModel  immodel.ConversationModel
+	ConversationsModel immodel.ConversationsModel
 }
 
 func NewServiceContext(c *config.Config) *ServiceContext {
 	svc := &ServiceContext{
-		Config:       c,
-		ChatLogModel: immodel.NewChatLogModel(c.Mongo.Url, c.Mongo.Db, c.Mongo.Collection),
-		Redisx:       redis.MustNewRedis(c.Redisx),
+		Config:             c,
+		ChatLogModel:       immodel.NewChatLogModel(c.Mongo.Url, c.Mongo.Db, c.Mongo.ChatLogCollection),
+		ConversationModel:  immodel.NewConversationModel(c.Mongo.Url, c.Mongo.Db, c.Mongo.ConversationCollection),
+		ConversationsModel: immodel.NewConversationsModel(c.Mongo.Url, c.Mongo.Db, c.Mongo.ConversationsCollection),
+		Redisx:             redis.MustNewRedis(c.Redisx),
 	}
 
 	token, err := svc.getSystemToken()

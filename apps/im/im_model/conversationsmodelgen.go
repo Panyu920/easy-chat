@@ -60,7 +60,7 @@ func (m *defaultConversationsModel) FindOne(ctx context.Context, id string) (*Co
 func (m *defaultConversationsModel) Update(ctx context.Context, data *Conversations) (*mongo.UpdateResult, error) {
 	data.UpdateAt = time.Now()
 
-	res, err := m.conn.UpdateOne(ctx, bson.M{"_id": data.ID}, bson.M{"$set": data})
+	res, err := m.conn.UpdateOne(ctx, bson.M{"_id": data.ID}, bson.M{"$set": bson.M{"conversation_list": data.ConversationList}})
 	return res, err
 }
 

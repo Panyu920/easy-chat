@@ -39,7 +39,10 @@ func (m *defaultChatLogModel) Insert(ctx context.Context, data *ChatLog) error {
 }
 
 func (m *defaultChatLogModel) FindOne(ctx context.Context, id string) (*ChatLog, error) {
+	// log.Printf("id: %v", id)
+
 	oid, err := bson.ObjectIDFromHex(id)
+	// log.Printf("oid: %v", oid)
 	if err != nil {
 		return nil, ErrInvalidObjectId
 	}

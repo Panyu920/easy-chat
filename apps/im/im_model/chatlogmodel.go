@@ -21,6 +21,7 @@ type (
 	ChatLogModel interface {
 		chatLogModel
 		ListChatLogBySendTime(ctx context.Context, conversationId string, startTime, endTime, limit int64) ([]*ChatLog, error)
+		WithTransaction(ctx context.Context, fn func(ctx context.Context) error) error
 	}
 
 	customChatLogModel struct {
@@ -73,4 +74,22 @@ func (m *customChatLogModel) ListChatLogBySendTime(ctx context.Context, conversa
 	default:
 		return nil, err
 	}
+}
+
+func (m *customChatLogModel) WithTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	session, err := m.conn.StartSession()
+	if err != nil {
+		return err
+	}
+	defer session.EndSession(ctx)
+
+	_, err = session.WithTransaction(ctx,
+		func(ctx context.Context) (interface{}, error) {
+			return nil, fn(ctx)
+		},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }

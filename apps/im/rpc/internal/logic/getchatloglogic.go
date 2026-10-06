@@ -35,6 +35,7 @@ func (l *GetChatLogLogic) GetChatLog(in *im.GetChatLogReq) (*im.GetChatLogResp, 
 		if err != nil {
 			// 消息不存在
 			if err == immodel.ErrNotFound {
+				l.Logger.Infof("msgId: %s not found", in.MsgId)
 				return &im.GetChatLogResp{
 					List: []*im.ChatLog{},
 				}, nil

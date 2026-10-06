@@ -20,6 +20,7 @@ func Chat(svc *svc.ServiceContext) websocketx.HandlerFunc {
 			server.Send("Decode chat data failed", conn)
 			return
 		}
+		chatData.Seq = msg.Seq
 
 		if chatData.RecvId == "" {
 			server.Logger.Error("recv id is empty")
@@ -57,6 +58,7 @@ func Chat(svc *svc.ServiceContext) websocketx.HandlerFunc {
 				MsgType:        chatData.MsgType,
 				Content:        chatData.Msg.Content,
 				SendTime:       chatData.SendTime,
+				Seq:            chatData.Seq,
 			})
 
 			if err != nil {
