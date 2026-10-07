@@ -23,3 +23,9 @@ Mongo:
   ConversationsCollection: conversations
 Ws:
   Host: 127.0.0.1:10003
+
+SocialRpc:
+  Etcd:
+    Hosts:
+    - 192.168.1.5:3379
+    Key: social.rpc

@@ -23,6 +23,7 @@ type (
 		FromID         string            `mapstructure:"from_id" json:"from_id,omitempty"`
 		SendId         string            `mapstructure:"send_id" json:"send_id,omitempty"`
 		RecvId         string            `mapstructure:"recv_id" json:"recv_id,omitempty"`
+		RecvIds        []string          `mapstructure:"recv_ids" json:"recv_ids,omitempty"`
 		SendTime       int64             `mapstructure:"send_time" json:"send_time,omitempty"`
 		MsgType        constant.MsgType  `mapstructure:"msg_type" json:"msg_type,omitempty"`
 		Content        string            `mapstructure:"content" json:"content,omitempty"`

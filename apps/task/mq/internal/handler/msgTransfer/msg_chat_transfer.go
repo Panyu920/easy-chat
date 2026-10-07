@@ -4,6 +4,7 @@ import (
 	"context"
 	immodel "easy-chat/apps/im/im_model"
 	"easy-chat/apps/im/ws/websocketx"
+	"easy-chat/apps/social/rpc/socialservice"
 	"easy-chat/apps/task/mq/internal/svc"
 	"easy-chat/apps/task/mq/mqtype"
 	"easy-chat/pkg/constant"
@@ -42,15 +43,16 @@ func (m *MsgChatTransfer) Consume(ctx context.Context, key, value string) error 
 	}
 	// todo 获取接收用户的登录状态
 	// 将聊天记录发送到im服务
-	var frame websocketx.Message
-	frame.FrameType = websocketx.FrameTypeData
-	frame.Method = "push"
-	frame.FromID = constant.REDIS_KEY_USER_ID
-	frame.Data = data
-	err = m.svc.WsClient.Send(frame)
-	if err != nil {
-		m.Logger.Errorf("Send frame failed: %v", err)
-		return err
+	if data.ChatType == constant.ChatTypeSingle {
+		err = m.single(ctx, &data)
+		if err != nil {
+			return err
+		}
+	} else if data.ChatType == constant.ChatTypeGroup {
+		err = m.group(ctx, &data)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -63,6 +65,7 @@ func (m *MsgChatTransfer) SaveChatLog(ctx context.Context, data *mqtype.MqChatTy
 	// 检查会话是否存在
 	conversation, err := m.svc.ConversationModel.FindByConversationId(ctx, data.ConversationId)
 	if err != nil {
+		m.Logger.Errorf("Find conversation failed: %v, conversation_id: %s", err, data.ConversationId)
 		return err
 	}
 
@@ -113,5 +116,43 @@ func (m *MsgChatTransfer) SaveChatLog(ctx context.Context, data *mqtype.MqChatTy
 		return err
 	}
 
+	return nil
+}
+
+func (m *MsgChatTransfer) single(ctx context.Context, data *mqtype.MqChatType) error {
+	var frame websocketx.Message
+	frame.FrameType = websocketx.FrameTypeData
+	frame.Method = "push"
+	frame.FromID = constant.REDIS_KEY_USER_ID
+	frame.Data = data
+	err := m.svc.WsClient.Send(frame)
+	if err != nil {
+		m.Logger.Errorf("Send frame failed: %v", err)
+		return err
+	}
+	return nil
+}
+func (m *MsgChatTransfer) group(ctx context.Context, data *mqtype.MqChatType) error {
+	resp, err := m.svc.SocialService.GroupMemberList(ctx, &socialservice.GroupMemberListRequest{
+		GroupId: data.ConversationId,
+		UserId:  data.SendId,
+	})
+	if err != nil {
+		return err
+	}
+
+	ids := make([]string, 0, len(resp.GroupMembers))
+	for _, member := range resp.GroupMembers {
+		if member.UserId == data.SendId {
+			continue
+		}
+		ids = append(ids, member.UserId)
+	}
+	data.RecvIds = ids
+	// 发送聊天记录
+	err = m.single(ctx, data)
+	if err != nil {
+		return err
+	}
 	return nil
 }

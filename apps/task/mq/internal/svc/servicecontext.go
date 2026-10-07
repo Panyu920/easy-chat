@@ -3,11 +3,13 @@ package svc
 import (
 	immodel "easy-chat/apps/im/im_model"
 	"easy-chat/apps/im/ws/websocketx"
+	"easy-chat/apps/social/rpc/socialservice"
 	"easy-chat/apps/task/mq/internal/config"
 	"easy-chat/pkg/constant"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/core/stores/redis"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ServiceContext struct {
@@ -17,6 +19,7 @@ type ServiceContext struct {
 	ChatLogModel       immodel.ChatLogModel
 	ConversationModel  immodel.ConversationModel
 	ConversationsModel immodel.ConversationsModel
+	SocialService      socialservice.SocialService
 }
 
 func NewServiceContext(c *config.Config) *ServiceContext {
@@ -26,6 +29,7 @@ func NewServiceContext(c *config.Config) *ServiceContext {
 		ConversationModel:  immodel.NewConversationModel(c.Mongo.Url, c.Mongo.Db, c.Mongo.ConversationCollection),
 		ConversationsModel: immodel.NewConversationsModel(c.Mongo.Url, c.Mongo.Db, c.Mongo.ConversationsCollection),
 		Redisx:             redis.MustNewRedis(c.Redisx),
+		SocialService:      socialservice.NewSocialService(zrpc.MustNewClient(c.SocialRpc)),
 	}
 
 	token, err := svc.getSystemToken()

@@ -6,6 +6,7 @@ import (
 	"easy-chat/apps/im/ws/websocketx"
 	"easy-chat/apps/task/mq/mqtype"
 	"easy-chat/pkg/constant"
+	"easy-chat/pkg/wuid"
 	"fmt"
 
 	"github.com/mitchellh/mapstructure"
@@ -44,61 +45,60 @@ func Chat(svc *svc.ServiceContext) websocketx.HandlerFunc {
 			// 查数据库消息
 		}
 
-		switch chatData.ChatType {
-		case constant.ChatTypeSingle:
-			// 单聊
-			// 发送消息到消息队列
-
-			err := svc.MqClient.Push(&mqtype.MqChatType{
-				ConversationId: chatData.ConversationId,
-				FromID:         userID,
-				SendId:         userID,
-				RecvId:         chatData.RecvId,
-				ChatType:       chatData.ChatType,
-				MsgType:        chatData.MsgType,
-				Content:        chatData.Msg.Content,
-				SendTime:       chatData.SendTime,
-				Seq:            chatData.Seq,
-			})
-
-			if err != nil {
-				server.Logger.Error(err)
-				server.Send(websocketx.NewErrMessage("push chat to mq failed"), conn)
-				return
-			}
-
-			// 缓存消息
-			server.MsgCache.Put(combineKey, struct{}{})
-			// 消息已处理，直接返回成功
-			server.Logger.Info("msg is cached", combineKey)
-			server.Send(websocketx.NewAckMessage(websocketx.Result{
-				ClientMsgId: msg.ClientMsgId,
-				Status:      "success",
-				Seq:         msg.Seq,
-			}), conn)
-			// 存储聊天记录
-			// err := logic.NewConversationLogic(context.Background(), svc, server).SingleChat(&chatData, conn.GetUserID())
-			// if err != nil {
-			// 	server.Logger.Error(err)
-			// 	server.Send("save chat log failed", conn)
-			// 	return
-			// }
-
-			// // 发送消息给接收者
-			// err = server.SendToUser(websocketx.NewMessage(websocketx.FrameTypeData, msg.Method, conn.GetUserID(), msg.Data), chatData.RecvId)
-			// server.Logger.Info("recv id", chatData.RecvId)
-			// if err != nil {
-			// 	server.Logger.Errorf("SendToUser failed err  %v ,from %s to %s,msgType  %v, msg  %s ", err, conn.GetUserID(), chatData.RecvId, chatData.MsgType, chatData.Content)
-			// 	server.Send("SendToUser failed", conn)
-			// 	return
-			// }
-
-			// return
-		case constant.ChatTypeGroup:
-			// 群聊
-		default:
-			// 其他类型
+		// 单聊
+		// 发送消息到消息队列
+		var conversationId string
+		if chatData.ChatType == constant.ChatTypeSingle {
+			conversationId = wuid.CombineUserID(userID, chatData.RecvId)
+		} else {
+			conversationId = chatData.RecvId
 		}
+
+		err := svc.MqClient.Push(&mqtype.MqChatType{
+			ConversationId: conversationId,
+			FromID:         userID,
+			SendId:         userID,
+			RecvId:         chatData.RecvId,
+			ChatType:       chatData.ChatType,
+			MsgType:        chatData.MsgType,
+			Content:        chatData.Msg.Content,
+			SendTime:       chatData.SendTime,
+			Seq:            chatData.Seq,
+		})
+
+		if err != nil {
+			server.Logger.Error(err)
+			server.Send(websocketx.NewErrMessage("push chat to mq failed"), conn)
+			return
+		}
+
+		// 缓存消息
+		server.MsgCache.Put(combineKey, struct{}{})
+		// 消息已处理，直接返回成功
+		server.Logger.Info("msg is cached", combineKey)
+		server.Send(websocketx.NewAckMessage(websocketx.Result{
+			ClientMsgId: msg.ClientMsgId,
+			Status:      "success",
+			Seq:         msg.Seq,
+		}), conn)
+		// 存储聊天记录
+		// err := logic.NewConversationLogic(context.Background(), svc, server).SingleChat(&chatData, conn.GetUserID())
+		// if err != nil {
+		// 	server.Logger.Error(err)
+		// 	server.Send("save chat log failed", conn)
+		// 	return
+		// }
+
+		// // 发送消息给接收者
+		// err = server.SendToUser(websocketx.NewMessage(websocketx.FrameTypeData, msg.Method, conn.GetUserID(), msg.Data), chatData.RecvId)
+		// server.Logger.Info("recv id", chatData.RecvId)
+		// if err != nil {
+		// 	server.Logger.Errorf("SendToUser failed err  %v ,from %s to %s,msgType  %v, msg  %s ", err, conn.GetUserID(), chatData.RecvId, chatData.MsgType, chatData.Content)
+		// 	server.Send("SendToUser failed", conn)
+		// 	return
+		// }
+
+		// return
 
 	}
 }

@@ -29,6 +29,7 @@ func NewGroupMemberListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 // 群成员列表服务
 func (l *GroupMemberListLogic) GroupMemberList(in *social.GroupMemberListRequest) (*social.GroupMemberListResponse, error) {
 	// todo: add your logic here and delete this line
+
 	// 1.检查用户是否为该群成员
 	_, err := l.svcCtx.GroupMembersModel.FindOneByGroupIdUserId(l.ctx, in.GroupId, in.UserId)
 	if err != nil {

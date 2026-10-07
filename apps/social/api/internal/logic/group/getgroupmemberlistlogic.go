@@ -44,6 +44,7 @@ func (l *Get_group_member_listLogic) Get_group_member_list(req *types.GroupMembe
 
 	groupMembers, err := l.svcCtx.SocialService.GroupMemberList(l.ctx, &socialservice.GroupMemberListRequest{
 		GroupId: req.GroupId,
+		UserId:  userId,
 	})
 	if err != nil {
 		return nil, err
