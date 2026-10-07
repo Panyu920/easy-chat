@@ -40,7 +40,7 @@ func (m *MsgChatTransfer) Consume(ctx context.Context, key, value string) error 
 		m.Logger.Errorf("Save chat log failed: %v", err)
 		return err
 	}
-
+	// todo 获取接收用户的登录状态
 	// 将聊天记录发送到im服务
 	var frame websocketx.Message
 	frame.FrameType = websocketx.FrameTypeData

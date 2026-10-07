@@ -76,6 +76,14 @@ message CreateGroupConversationReq {
 }
 message CreateGroupConversationResp {}
 
+message JoinGroupConversationReq {
+  string group_id = 1;
+  string user_id = 2;
+}
+message JoinGroupConversationResp {
+  string group_id = 1;
+}
+
 // ------------ service ---------------
 service Im {
   // 获取会话记录
@@ -88,4 +96,6 @@ service Im {
   rpc PutConversations(PutConversationsReq)  returns(PutConversationsResp);
   // 创建群聊会话
   rpc CreateGroupConversation(CreateGroupConversationReq) returns(CreateGroupConversationResp);
+  // 加入群聊会话
+  rpc JoinGroupConversation(JoinGroupConversationReq) returns(JoinGroupConversationResp);
 }

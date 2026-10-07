@@ -722,6 +722,102 @@ func (*CreateGroupConversationResp) Descriptor() ([]byte, []int) {
 	return file_apps_im_rpc_proto_im_proto_rawDescGZIP(), []int{11}
 }
 
+type JoinGroupConversationReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinGroupConversationReq) Reset() {
+	*x = JoinGroupConversationReq{}
+	mi := &file_apps_im_rpc_proto_im_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinGroupConversationReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinGroupConversationReq) ProtoMessage() {}
+
+func (x *JoinGroupConversationReq) ProtoReflect() protoreflect.Message {
+	mi := &file_apps_im_rpc_proto_im_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinGroupConversationReq.ProtoReflect.Descriptor instead.
+func (*JoinGroupConversationReq) Descriptor() ([]byte, []int) {
+	return file_apps_im_rpc_proto_im_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *JoinGroupConversationReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *JoinGroupConversationReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type JoinGroupConversationResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinGroupConversationResp) Reset() {
+	*x = JoinGroupConversationResp{}
+	mi := &file_apps_im_rpc_proto_im_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinGroupConversationResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinGroupConversationResp) ProtoMessage() {}
+
+func (x *JoinGroupConversationResp) ProtoReflect() protoreflect.Message {
+	mi := &file_apps_im_rpc_proto_im_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinGroupConversationResp.ProtoReflect.Descriptor instead.
+func (*JoinGroupConversationResp) Descriptor() ([]byte, []int) {
+	return file_apps_im_rpc_proto_im_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *JoinGroupConversationResp) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
 var File_apps_im_rpc_proto_im_proto protoreflect.FileDescriptor
 
 const file_apps_im_rpc_proto_im_proto_rawDesc = "" +
@@ -778,14 +874,20 @@ const file_apps_im_rpc_proto_im_proto_rawDesc = "" +
 	"\x1aCreateGroupConversationReq\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x1b\n" +
 	"\tcreate_id\x18\x02 \x01(\tR\bcreateId\"\x1d\n" +
-	"\x1bCreateGroupConversationResp2\xf9\x02\n" +
+	"\x1bCreateGroupConversationResp\"N\n" +
+	"\x18JoinGroupConversationReq\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"6\n" +
+	"\x19JoinGroupConversationResp\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId2\xcf\x03\n" +
 	"\x02Im\x123\n" +
 	"\n" +
 	"GetChatLog\x12\x11.im.GetChatLogReq\x1a\x12.im.GetChatLogResp\x12T\n" +
 	"\x15SetUpUserConversation\x12\x1c.im.SetUpUserConversationReq\x1a\x1d.im.SetUpUserConversationResp\x12E\n" +
 	"\x10GetConversations\x12\x17.im.GetConversationsReq\x1a\x18.im.GetConversationsResp\x12E\n" +
 	"\x10PutConversations\x12\x17.im.PutConversationsReq\x1a\x18.im.PutConversationsResp\x12Z\n" +
-	"\x17CreateGroupConversation\x12\x1e.im.CreateGroupConversationReq\x1a\x1f.im.CreateGroupConversationRespB\x06Z\x04./imb\x06proto3"
+	"\x17CreateGroupConversation\x12\x1e.im.CreateGroupConversationReq\x1a\x1f.im.CreateGroupConversationResp\x12T\n" +
+	"\x15JoinGroupConversation\x12\x1c.im.JoinGroupConversationReq\x1a\x1d.im.JoinGroupConversationRespB\x06Z\x04./imb\x06proto3"
 
 var (
 	file_apps_im_rpc_proto_im_proto_rawDescOnce sync.Once
@@ -799,7 +901,7 @@ func file_apps_im_rpc_proto_im_proto_rawDescGZIP() []byte {
 	return file_apps_im_rpc_proto_im_proto_rawDescData
 }
 
-var file_apps_im_rpc_proto_im_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_apps_im_rpc_proto_im_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_apps_im_rpc_proto_im_proto_goTypes = []any{
 	(*ChatLog)(nil),                     // 0: im.ChatLog
 	(*Conversation)(nil),                // 1: im.Conversation
@@ -813,13 +915,15 @@ var file_apps_im_rpc_proto_im_proto_goTypes = []any{
 	(*SetUpUserConversationResp)(nil),   // 9: im.SetUpUserConversationResp
 	(*CreateGroupConversationReq)(nil),  // 10: im.CreateGroupConversationReq
 	(*CreateGroupConversationResp)(nil), // 11: im.CreateGroupConversationResp
-	nil,                                 // 12: im.GetConversationsResp.ConversationListEntry
-	nil,                                 // 13: im.PutConversationsReq.ConversationListEntry
+	(*JoinGroupConversationReq)(nil),    // 12: im.JoinGroupConversationReq
+	(*JoinGroupConversationResp)(nil),   // 13: im.JoinGroupConversationResp
+	nil,                                 // 14: im.GetConversationsResp.ConversationListEntry
+	nil,                                 // 15: im.PutConversationsReq.ConversationListEntry
 }
 var file_apps_im_rpc_proto_im_proto_depIdxs = []int32{
 	0,  // 0: im.Conversation.msg:type_name -> im.ChatLog
-	12, // 1: im.GetConversationsResp.conversation_list:type_name -> im.GetConversationsResp.ConversationListEntry
-	13, // 2: im.PutConversationsReq.conversation_list:type_name -> im.PutConversationsReq.ConversationListEntry
+	14, // 1: im.GetConversationsResp.conversation_list:type_name -> im.GetConversationsResp.ConversationListEntry
+	15, // 2: im.PutConversationsReq.conversation_list:type_name -> im.PutConversationsReq.ConversationListEntry
 	0,  // 3: im.GetChatLogResp.list:type_name -> im.ChatLog
 	1,  // 4: im.SetUpUserConversationResp.conversation:type_name -> im.Conversation
 	1,  // 5: im.GetConversationsResp.ConversationListEntry.value:type_name -> im.Conversation
@@ -829,13 +933,15 @@ var file_apps_im_rpc_proto_im_proto_depIdxs = []int32{
 	2,  // 9: im.Im.GetConversations:input_type -> im.GetConversationsReq
 	4,  // 10: im.Im.PutConversations:input_type -> im.PutConversationsReq
 	10, // 11: im.Im.CreateGroupConversation:input_type -> im.CreateGroupConversationReq
-	7,  // 12: im.Im.GetChatLog:output_type -> im.GetChatLogResp
-	9,  // 13: im.Im.SetUpUserConversation:output_type -> im.SetUpUserConversationResp
-	3,  // 14: im.Im.GetConversations:output_type -> im.GetConversationsResp
-	5,  // 15: im.Im.PutConversations:output_type -> im.PutConversationsResp
-	11, // 16: im.Im.CreateGroupConversation:output_type -> im.CreateGroupConversationResp
-	12, // [12:17] is the sub-list for method output_type
-	7,  // [7:12] is the sub-list for method input_type
+	12, // 12: im.Im.JoinGroupConversation:input_type -> im.JoinGroupConversationReq
+	7,  // 13: im.Im.GetChatLog:output_type -> im.GetChatLogResp
+	9,  // 14: im.Im.SetUpUserConversation:output_type -> im.SetUpUserConversationResp
+	3,  // 15: im.Im.GetConversations:output_type -> im.GetConversationsResp
+	5,  // 16: im.Im.PutConversations:output_type -> im.PutConversationsResp
+	11, // 17: im.Im.CreateGroupConversation:output_type -> im.CreateGroupConversationResp
+	13, // 18: im.Im.JoinGroupConversation:output_type -> im.JoinGroupConversationResp
+	13, // [13:19] is the sub-list for method output_type
+	7,  // [7:13] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name
@@ -852,7 +958,7 @@ func file_apps_im_rpc_proto_im_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_apps_im_rpc_proto_im_proto_rawDesc), len(file_apps_im_rpc_proto_im_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -118,6 +118,7 @@ func (l *GroupAddHandlerLogic) GroupAddHandler(in *social.GroupAddHandlerRequest
 	}
 
 	return &social.GroupAddHandlerResponse{
-		GroupId: req.GroupId,
+		GroupId:   req.GroupId,
+		ReqUserId: req.UserId,
 	}, nil
 }

@@ -24,6 +24,7 @@ const (
 	Im_GetConversations_FullMethodName        = "/im.Im/GetConversations"
 	Im_PutConversations_FullMethodName        = "/im.Im/PutConversations"
 	Im_CreateGroupConversation_FullMethodName = "/im.Im/CreateGroupConversation"
+	Im_JoinGroupConversation_FullMethodName   = "/im.Im/JoinGroupConversation"
 )
 
 // ImClient is the client API for Im service.
@@ -42,6 +43,8 @@ type ImClient interface {
 	PutConversations(ctx context.Context, in *PutConversationsReq, opts ...grpc.CallOption) (*PutConversationsResp, error)
 	// 创建群聊会话
 	CreateGroupConversation(ctx context.Context, in *CreateGroupConversationReq, opts ...grpc.CallOption) (*CreateGroupConversationResp, error)
+	// 加入群聊会话
+	JoinGroupConversation(ctx context.Context, in *JoinGroupConversationReq, opts ...grpc.CallOption) (*JoinGroupConversationResp, error)
 }
 
 type imClient struct {
@@ -102,6 +105,16 @@ func (c *imClient) CreateGroupConversation(ctx context.Context, in *CreateGroupC
 	return out, nil
 }
 
+func (c *imClient) JoinGroupConversation(ctx context.Context, in *JoinGroupConversationReq, opts ...grpc.CallOption) (*JoinGroupConversationResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(JoinGroupConversationResp)
+	err := c.cc.Invoke(ctx, Im_JoinGroupConversation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ImServer is the server API for Im service.
 // All implementations must embed UnimplementedImServer
 // for forward compatibility.
@@ -118,6 +131,8 @@ type ImServer interface {
 	PutConversations(context.Context, *PutConversationsReq) (*PutConversationsResp, error)
 	// 创建群聊会话
 	CreateGroupConversation(context.Context, *CreateGroupConversationReq) (*CreateGroupConversationResp, error)
+	// 加入群聊会话
+	JoinGroupConversation(context.Context, *JoinGroupConversationReq) (*JoinGroupConversationResp, error)
 	mustEmbedUnimplementedImServer()
 }
 
@@ -142,6 +157,9 @@ func (UnimplementedImServer) PutConversations(context.Context, *PutConversations
 }
 func (UnimplementedImServer) CreateGroupConversation(context.Context, *CreateGroupConversationReq) (*CreateGroupConversationResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateGroupConversation not implemented")
+}
+func (UnimplementedImServer) JoinGroupConversation(context.Context, *JoinGroupConversationReq) (*JoinGroupConversationResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method JoinGroupConversation not implemented")
 }
 func (UnimplementedImServer) mustEmbedUnimplementedImServer() {}
 func (UnimplementedImServer) testEmbeddedByValue()            {}
@@ -254,6 +272,24 @@ func _Im_CreateGroupConversation_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Im_JoinGroupConversation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinGroupConversationReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImServer).JoinGroupConversation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Im_JoinGroupConversation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImServer).JoinGroupConversation(ctx, req.(*JoinGroupConversationReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Im_ServiceDesc is the grpc.ServiceDesc for Im service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -280,6 +316,10 @@ var Im_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateGroupConversation",
 			Handler:    _Im_CreateGroupConversation_Handler,
+		},
+		{
+			MethodName: "JoinGroupConversation",
+			Handler:    _Im_JoinGroupConversation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

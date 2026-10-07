@@ -6,6 +6,7 @@ package group
 import (
 	"context"
 
+	"easy-chat/apps/im/rpc/im"
 	"easy-chat/apps/social/api/internal/svc"
 	"easy-chat/apps/social/api/internal/types"
 	"easy-chat/apps/social/rpc/socialservice"
@@ -51,7 +52,7 @@ func (l *Handle_group_addLogic) Handle_group_add(req *types.GroupAddHandlerReq) 
 		return nil, errors.WithStack(err)
 	}
 
-	_, err = l.svcCtx.SocialService.GroupAddHandler(l.ctx, &socialservice.GroupAddHandlerRequest{
+	res, err := l.svcCtx.SocialService.GroupAddHandler(l.ctx, &socialservice.GroupAddHandlerRequest{
 		GroupId:       req.GroupId,
 		ReqStatus:     req.ReqStatus,
 		HandlerUserId: userId,
@@ -59,6 +60,16 @@ func (l *Handle_group_addLogic) Handle_group_add(req *types.GroupAddHandlerReq) 
 	})
 	if err != nil {
 		return nil, err
+	}
+	// if pass, then create group conversation
+	if req.ReqStatus == int32(constant.Pass) {
+		_, err = l.svcCtx.ImClient.JoinGroupConversation(l.ctx, &im.JoinGroupConversationReq{
+			GroupId: req.GroupId,
+			UserId:  res.ReqUserId,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 	resp = &types.GroupAddHandlerResp{
 		GroupId: req.GroupId,

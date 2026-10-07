@@ -1325,6 +1325,7 @@ func (x *GroupAddHandlerRequest) GetReqStatus() int32 {
 type GroupAddHandlerResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	ReqUserId     string                 `protobuf:"bytes,2,opt,name=req_user_id,json=reqUserId,proto3" json:"req_user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1362,6 +1363,13 @@ func (*GroupAddHandlerResponse) Descriptor() ([]byte, []int) {
 func (x *GroupAddHandlerResponse) GetGroupId() string {
 	if x != nil {
 		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GroupAddHandlerResponse) GetReqUserId() string {
+	if x != nil {
+		return x.ReqUserId
 	}
 	return ""
 }
@@ -1662,9 +1670,10 @@ const file_apps_social_rpc_proto_social_proto_rawDesc = "" +
 	"\bgroup_id\x18\x02 \x01(\tR\agroupId\x12&\n" +
 	"\x0fhandler_user_id\x18\x03 \x01(\tR\rhandlerUserId\x12\x1d\n" +
 	"\n" +
-	"req_status\x18\x04 \x01(\x05R\treqStatus\"4\n" +
+	"req_status\x18\x04 \x01(\x05R\treqStatus\"T\n" +
 	"\x17GroupAddHandlerResponse\x12\x19\n" +
-	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"+\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x1e\n" +
+	"\vreq_user_id\x18\x02 \x01(\tR\treqUserId\"+\n" +
 	"\x10GroupListRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\":\n" +
 	"\x11GroupListResponse\x12%\n" +

@@ -149,6 +149,7 @@ message GroupAddHandlerRequest{
 
 message GroupAddHandlerResponse{
     string group_id = 1;
+    string req_user_id = 2;
 }
 
 

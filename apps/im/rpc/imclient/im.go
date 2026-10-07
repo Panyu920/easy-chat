@@ -22,6 +22,8 @@ type (
 	GetChatLogResp              = im.GetChatLogResp
 	GetConversationsReq         = im.GetConversationsReq
 	GetConversationsResp        = im.GetConversationsResp
+	JoinGroupConversationReq    = im.JoinGroupConversationReq
+	JoinGroupConversationResp   = im.JoinGroupConversationResp
 	PutConversationsReq         = im.PutConversationsReq
 	PutConversationsResp        = im.PutConversationsResp
 	SetUpUserConversationReq    = im.SetUpUserConversationReq
@@ -38,6 +40,8 @@ type (
 		PutConversations(ctx context.Context, in *PutConversationsReq, opts ...grpc.CallOption) (*PutConversationsResp, error)
 		// 创建群聊会话
 		CreateGroupConversation(ctx context.Context, in *CreateGroupConversationReq, opts ...grpc.CallOption) (*CreateGroupConversationResp, error)
+		// 加入群聊会话
+		JoinGroupConversation(ctx context.Context, in *JoinGroupConversationReq, opts ...grpc.CallOption) (*JoinGroupConversationResp, error)
 	}
 
 	defaultIm struct {
@@ -79,4 +83,10 @@ func (m *defaultIm) PutConversations(ctx context.Context, in *PutConversationsRe
 func (m *defaultIm) CreateGroupConversation(ctx context.Context, in *CreateGroupConversationReq, opts ...grpc.CallOption) (*CreateGroupConversationResp, error) {
 	client := im.NewImClient(m.cli.Conn())
 	return client.CreateGroupConversation(ctx, in, opts...)
+}
+
+// 加入群聊会话
+func (m *defaultIm) JoinGroupConversation(ctx context.Context, in *JoinGroupConversationReq, opts ...grpc.CallOption) (*JoinGroupConversationResp, error) {
+	client := im.NewImClient(m.cli.Conn())
+	return client.JoinGroupConversation(ctx, in, opts...)
 }

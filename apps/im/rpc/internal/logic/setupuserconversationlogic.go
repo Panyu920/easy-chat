@@ -56,21 +56,21 @@ func (l *SetUpUserConversationLogic) SetUpUserConversation(in *im.SetUpUserConve
 		// 1. 插入会话
 		err := l.svcCtx.ConversationModel.Insert(ctx, conversation)
 		if err != nil {
-			return err
+			return errors.Wrapf(xerr.NewDBError(), "ConversationModel.Insert failed err %v, conversationID %s", err, conversationID)
 		}
 		// 2. 更新或插入会话到用户会话表
-		err = l.setUpUserConversation(conversationID, in.SendId, conversation.ChatType, false)
+		err = l.SetUpUserOneConversation(conversationID, in.SendId, conversation.ChatType, false)
 		if err != nil {
-			return err
+			return errors.Wrapf(xerr.NewDBError(), "SetUpUserOneConversation failed err %v, conversationID %s", err, conversationID)
 		}
-		err = l.setUpUserConversation(conversationID, in.RecvId, conversation.ChatType, false)
+		err = l.SetUpUserOneConversation(conversationID, in.RecvId, conversation.ChatType, false)
 		if err != nil {
-			return err
+			return errors.Wrapf(xerr.NewDBError(), "SetUpUserOneConversation failed err %v, conversationID %s", err, conversationID)
 		}
 		return nil
 	})
 	if err != nil {
-		return nil, errors.Wrapf(xerr.NewDBError(), "ConversationModel.WithTransaction create conversation err %v, conversationID %s", err, conversationID)
+		return nil, err
 	}
 
 	return &im.SetUpUserConversationResp{
@@ -82,7 +82,7 @@ func (l *SetUpUserConversationLogic) SetUpUserConversation(in *im.SetUpUserConve
 	}, nil
 }
 
-func (l *SetUpUserConversationLogic) setUpUserConversation(conversationID, userId string, chatType constant.ChatType, isShow bool) error {
+func (l *SetUpUserConversationLogic) SetUpUserOneConversation(conversationID, userId string, chatType constant.ChatType, isShow bool) error {
 	conversations, err := l.svcCtx.ConversationsModel.FindByUserId(l.ctx, userId)
 	if err != nil && err != immodel.ErrNotFound {
 		return err

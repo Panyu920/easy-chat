@@ -6,6 +6,7 @@ package group
 import (
 	"context"
 
+	"easy-chat/apps/im/rpc/im"
 	"easy-chat/apps/social/api/internal/svc"
 	"easy-chat/apps/social/api/internal/types"
 	"easy-chat/apps/social/rpc/socialservice"
@@ -73,6 +74,16 @@ func (l *Create_groupLogic) Create_group(req *types.GroupCreateReq) (resp *types
 	if err != nil {
 		return nil, err
 	}
+
+	// 创建群组会话
+	_, err = l.svcCtx.ImClient.CreateGroupConversation(l.ctx, &im.CreateGroupConversationReq{
+		GroupId:  gp.GroupId,
+		CreateId: userId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	resp = &types.GroupCreateResp{
 		GroupInfo: types.Group{
 			Id:           gp.GroupId,

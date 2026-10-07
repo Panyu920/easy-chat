@@ -52,3 +52,9 @@ func (s *ImServer) CreateGroupConversation(ctx context.Context, in *im.CreateGro
 	l := logic.NewCreateGroupConversationLogic(ctx, s.svcCtx)
 	return l.CreateGroupConversation(in)
 }
+
+// 加入群聊会话
+func (s *ImServer) JoinGroupConversation(ctx context.Context, in *im.JoinGroupConversationReq) (*im.JoinGroupConversationResp, error) {
+	l := logic.NewJoinGroupConversationLogic(ctx, s.svcCtx)
+	return l.JoinGroupConversation(in)
+}

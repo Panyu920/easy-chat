@@ -22,6 +22,10 @@ func Push(svc *svc.ServiceContext) websocketx.HandlerFunc {
 		if recvConn == nil {
 			return
 		}
+		// }else {
+		// 	// 用户在其它网关登录
+		// }
+
 		chatData := msgtype.Chat{
 			ConversationId: data.ConversationId,
 			ChatType:       data.ChatType,
