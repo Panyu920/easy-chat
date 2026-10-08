@@ -11,3 +11,8 @@ Mongo:
   Collection: chat_log
   ConversationCollection: conversation
   ConversationsCollection: conversations
+
+Redisx:
+  Host: 192.168.1.5:16379
+  Type: node
+  Pass: easy-chat

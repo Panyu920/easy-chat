@@ -55,7 +55,11 @@ func (l *CreateGroupConversationLogic) CreateGroupConversation(in *im.CreateGrou
 		if err != nil {
 			return errors.Wrapf(xerr.NewDBError(), "SetUpUserOneConversation failed err %v ,groupId %v", err, in.GroupId)
 		}
-
+		// 3.在rediss设置会话ID和会话seq
+		_, err = l.svcCtx.RedisxClient.Setnx(in.GroupId, "0")
+		if err != nil {
+			return errors.Wrapf(xerr.NewDBError(), "RedisxClient.Setnx err %v, conversationID %s", err, in.GroupId)
+		}
 		return nil
 	})
 	if err != nil {

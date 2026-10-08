@@ -45,6 +45,7 @@ func singlePush(server *websocketx.Server, data msgtype.Push, fromID string, rec
 		SendId:         data.SendId,
 		RecvId:         recvID,
 		SendTime:       data.SendTime,
+		Seq:            data.Seq,
 		Msg: msgtype.Msg{
 			MsgType: data.MsgType,
 			Content: data.Content,

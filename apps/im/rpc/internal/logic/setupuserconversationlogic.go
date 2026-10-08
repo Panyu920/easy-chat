@@ -28,7 +28,7 @@ func NewSetUpUserConversationLogic(ctx context.Context, svcCtx *svc.ServiceConte
 	}
 }
 
-// 建立会话: 群聊, 私聊
+// 建立会话:  私聊
 func (l *SetUpUserConversationLogic) SetUpUserConversation(in *im.SetUpUserConversationReq) (*im.SetUpUserConversationResp, error) {
 	// todo: add your logic here and delete this line
 
@@ -66,6 +66,11 @@ func (l *SetUpUserConversationLogic) SetUpUserConversation(in *im.SetUpUserConve
 		err = l.SetUpUserOneConversation(conversationID, in.RecvId, conversation.ChatType, false)
 		if err != nil {
 			return errors.Wrapf(xerr.NewDBError(), "SetUpUserOneConversation failed err %v, conversationID %s", err, conversationID)
+		}
+		// 3.在rediss设置会话ID和会话seq
+		_, err = l.svcCtx.RedisxClient.Setnx(conversationID, "0")
+		if err != nil {
+			return errors.Wrapf(xerr.NewDBError(), "RedisxClient.Setnx err %v, conversationID %s", err, conversationID)
 		}
 		return nil
 	})

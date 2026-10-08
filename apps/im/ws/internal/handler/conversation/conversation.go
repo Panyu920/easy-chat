@@ -21,7 +21,7 @@ func Chat(svc *svc.ServiceContext) websocketx.HandlerFunc {
 			server.Send("Decode chat data failed", conn)
 			return
 		}
-		chatData.Seq = msg.Seq
+		// chatData.Seq = msg.Seq
 
 		if chatData.RecvId == "" {
 			server.Logger.Error("recv id is empty")
@@ -53,8 +53,10 @@ func Chat(svc *svc.ServiceContext) websocketx.HandlerFunc {
 		} else {
 			conversationId = chatData.RecvId
 		}
+		// 在redis中获取会话seq
+		seq, err := svc.RedisxClient.Incr(conversationId)
 
-		err := svc.MqClient.Push(&mqtype.MqChatType{
+		err = svc.MqClient.Push(&mqtype.MqChatType{
 			ConversationId: conversationId,
 			FromID:         userID,
 			SendId:         userID,
@@ -63,7 +65,7 @@ func Chat(svc *svc.ServiceContext) websocketx.HandlerFunc {
 			MsgType:        chatData.MsgType,
 			Content:        chatData.Msg.Content,
 			SendTime:       chatData.SendTime,
-			Seq:            chatData.Seq,
+			Seq:            seq,
 		})
 
 		if err != nil {
@@ -75,7 +77,7 @@ func Chat(svc *svc.ServiceContext) websocketx.HandlerFunc {
 		// 缓存消息
 		server.MsgCache.Put(combineKey, struct{}{})
 		// 消息已处理，直接返回成功
-		server.Logger.Info("msg is cached", combineKey)
+		// server.Logger.Info("msg is cached", combineKey)
 		server.Send(websocketx.NewAckMessage(websocketx.Result{
 			ClientMsgId: msg.ClientMsgId,
 			Status:      "success",

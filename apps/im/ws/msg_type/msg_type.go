@@ -27,5 +27,6 @@ type (
 		SendTime       int64             `mapstructure:"send_time" json:"send_time,omitempty"`
 		MsgType        constant.MsgType  `mapstructure:"msg_type" json:"msg_type,omitempty"`
 		Content        string            `mapstructure:"content" json:"content,omitempty"`
+		Seq            int64             `mapstructure:"seq" json:"seq,omitempty"`
 	}
 )
