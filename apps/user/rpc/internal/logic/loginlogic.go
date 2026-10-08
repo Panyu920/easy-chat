@@ -9,6 +9,7 @@ import (
 	"easy-chat/apps/user/models"
 	"easy-chat/apps/user/rpc/internal/svc"
 	"easy-chat/apps/user/rpc/user"
+	"easy-chat/pkg/constant"
 	"easy-chat/pkg/encrypt"
 	"easy-chat/pkg/token"
 	"easy-chat/pkg/xerr"
@@ -58,6 +59,12 @@ func (l *LoginLogic) Login(in *user.LoginRequest) (*user.LoginResponse, error) {
 	accessToken, err := token.GenerateToken(l.svcCtx.Config.Jwt.AccessSecret, userInfo.Id, now, l.svcCtx.Config.Jwt.AccessExpire)
 	if err != nil {
 		return nil, errors.Wrapf(xerr.NewInternalError(), "生成token失败: %v, user id: %s", err, userInfo.Id)
+	}
+
+	// 4. 登录成功，设置用户在线状态
+	err = l.svcCtx.Redisx.Hset(constant.USER_ONLINE_KEY, userInfo.Id, "1")
+	if err != nil {
+		return nil, errors.Wrapf(xerr.NewInternalError(), "设置用户在线状态失败: %v, user id: %s", err, userInfo.Id)
 	}
 	return &user.LoginResponse{
 		Token:     accessToken,

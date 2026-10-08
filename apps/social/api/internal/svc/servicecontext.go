@@ -9,6 +9,7 @@ import (
 	"easy-chat/apps/social/rpc/socialservice"
 	"easy-chat/apps/user/rpc/userservice"
 
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
@@ -17,7 +18,8 @@ type ServiceContext struct {
 
 	userservice.UserService
 	socialservice.SocialService
-	ImClient imclient.Im
+	ImClient     imclient.Im
+	RedisxClient *redis.Redis
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -26,5 +28,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserService:   userservice.NewUserService(zrpc.MustNewClient(c.UserRpc)),
 		SocialService: socialservice.NewSocialService(zrpc.MustNewClient(c.SocialRpc)),
 		ImClient:      imclient.NewIm(zrpc.MustNewClient(c.ImRpc)),
+		RedisxClient:  redis.MustNewRedis(c.Redisx),
 	}
 }

@@ -40,6 +40,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/friend/list",
 				Handler: friend.Get_friend_listHandler(serverCtx),
 			},
+			{
+				// 好友在线列表
+				Method:  http.MethodGet,
+				Path:    "/friend/online",
+				Handler: friend.Get_friend_online_listHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
 		rest.WithPrefix("/social"),
@@ -82,6 +88,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/group/member/list",
 				Handler: group.Get_group_member_listHandler(serverCtx),
+			},
+			{
+				// 群成员在线列表
+				Method:  http.MethodGet,
+				Path:    "/group/member/online/",
+				Handler: group.Get_group_member_online_listHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),

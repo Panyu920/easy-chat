@@ -42,6 +42,13 @@ type FriendListResp struct {
 	Friends []Friend `json:"friends"`
 }
 
+type FriendOnlineListReq struct {
+}
+
+type FriendOnlineListResp struct {
+	FriendOnlineList []UserOnline `json:"friend_online_list"`
+}
+
 type FriendRequest struct {
 	Id         int64  `json:"id"`
 	UserId     string `json:"user_id"`
@@ -136,6 +143,14 @@ type GroupMemberListResp struct {
 	GroupMembers []GroupMember `json:"group_members"`
 }
 
+type GroupMemberOnlineListReq struct {
+	GroupId string `json:"group_id"`
+}
+
+type GroupMemberOnlineListResp struct {
+	GroupMemberOnlineList []UserOnline `json:"group_member_online_list"`
+}
+
 type GroupRequest struct {
 	Id            int64  `json:"id"`
 	GroupId       string `json:"group_id"`
@@ -148,4 +163,9 @@ type GroupRequest struct {
 	HandlerUserId string `json:"handler_user_id"`
 	UserAvatar    string `json:"user_avatar"`
 	UserName      string `json:"user_name"`
+}
+
+type UserOnline struct {
+	UserId string `json:"user_id"`
+	Online bool   `json:"online"`
 }
