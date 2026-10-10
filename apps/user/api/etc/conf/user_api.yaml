@@ -1,9 +1,9 @@
 host: 0.0.0.0
 jwtauth:
-    accessexpire: 864005
+    accessexpire: 864000
     accesssecret: easy-chat
 name: user
-port: 5999
+port: 5000
 userrpc:
     etcd:
         hosts:

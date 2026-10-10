@@ -6,9 +6,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	_ "net/http/pprof"
 	"os"
 	"sync"
 	"syscall"
+	"time"
 
 	"easy-chat/apps/user/api/internal/config"
 	"easy-chat/apps/user/api/internal/handler"
@@ -19,12 +21,14 @@ import (
 
 	configserver "easy-chat/pkg/config_server"
 
+	"github.com/zeromicro/go-zero/core/proc"
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 var configFile = flag.String("f", "etc/user.yaml", "the config file")
-var restartChan = make(chan struct{})
+
+// var restartChan = make(chan struct{})
 var server *rest.Server
 var wg sync.WaitGroup
 
@@ -53,16 +57,18 @@ func main() {
 			return nil
 		}
 		// fmt.Println("durantion :", c.)
-		// proc.WrapUp()
-		// proc.Shutdown()
+		proc.Shutdown()
+		time.Sleep(1 * time.Second)
+		proc.WrapUp()
 		// proc.SetTimeToForceQuit(10 * time.Millisecond)
 
-		sendSIGINT()
+		// sendSIGINT()
 		c = nc
-		<-restartChan
+		wg.Wait()
+		// <-restartChan
 		wait_run(&nc)
 
-		wg.Wait()
+		// wg.Wait()
 		return nil
 	})
 	if err != nil {
@@ -70,7 +76,7 @@ func main() {
 	}
 	wait_run(&c)
 
-	wg.Wait()
+	// wg.Wait()
 	select {}
 }
 func run(c *config.Config) {
@@ -92,7 +98,7 @@ func wait_run(c *config.Config) {
 	go func() {
 		run(c)
 		defer wg.Done()
-		restartChan <- struct{}{}
+		// restartChan <- struct{}{}
 	}()
 }
 func sendSIGINT() error {

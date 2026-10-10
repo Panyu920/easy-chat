@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"sync"
+	"time"
 
 	"easy-chat/apps/user/rpc/internal/config"
 	"easy-chat/apps/user/rpc/internal/server"
@@ -13,6 +14,7 @@ import (
 	rpcserver "easy-chat/pkg/interceptor/rpcServer"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/zeromicro/go-zero/core/proc"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
@@ -20,6 +22,7 @@ import (
 )
 
 var configFile = flag.String("f", "etc/dev/rpc.yaml", "the config file")
+var grpcSvr *grpc.Server
 var wg sync.WaitGroup
 
 func main() {
@@ -32,7 +35,7 @@ func main() {
 		ProjectKey:     "98c6f2c2287f4c73cea3d40ae7ec3ff2",
 		Namespace:      "user",
 		Configs:        "user_rpc.yaml",
-		ConfigFilePath: "", // 本地配置文件存放路径，空代表不存储本地配置文件
+		ConfigFilePath: "apps/user/rpc/etc/conf", // 本地配置文件存放路径，空代表不存储本地配置文件
 		LogLevel:       "DEBUG",
 	})
 	configServer := configserver.NewConfigServer(*configFile, sail)
@@ -48,7 +51,12 @@ func main() {
 		}
 		// proc.WrapUp()
 		// grpcSvr.GracefulStop()
+		// grpcSvr.GracefulStop()
+		proc.Shutdown()
+		time.Sleep(1 * time.Second)
+		proc.WrapUp()
 		c = nc
+		wg.Wait()
 		wait_run(&nc)
 		return nil
 	})
@@ -57,16 +65,19 @@ func main() {
 	}
 	wait_run(&c)
 
-	wg.Wait()
+	// wg.Wait()
+	select {}
 }
 
 func wait_run(c *config.Config) {
 	wg.Add(1)
-	go run(c)
+	go func() {
+		run(c)
+		defer wg.Done()
+	}()
 }
 func run(c *config.Config) {
 
-	defer wg.Done()
 	ctx := svc.NewServiceContext(*c)
 	// 设置系统根用户
 	if err := ctx.SetSystemRootToken(); err != nil {
@@ -76,6 +87,7 @@ func run(c *config.Config) {
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		user.RegisterUserServiceServer(grpcServer, server.NewUserServiceServer(ctx))
 
+		grpcSvr = grpcServer
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
 		}
