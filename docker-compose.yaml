@@ -6,3 +6,4 @@ include:
   - './deploy/docker_compose/mongo.yaml'
   - './deploy/docker_compose/kafka.yaml'
   - './deploy/docker_compose/apisix.yaml'
+  - './deploy/docker_compose/sail.yaml'

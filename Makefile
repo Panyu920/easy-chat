@@ -18,6 +18,8 @@ db_schema:
 
 db_create:
 	@make -f ./deploy/mk/db.mk create_db
+db_new_migration_sail:
+	@make -f ./deploy/mk/db.mk new_migration_sail
 
 db_new_migration:
 	@make -f ./deploy/mk/db.mk new_migration
@@ -29,6 +31,11 @@ db_migrate_down_1:
 	@make -f ./deploy/mk/db.mk migrate_down_1
 db_sqlc:
 	@make -f ./deploy/mk/db.mk sqlc
+
+db_migrate_down_sail:
+	@make -f ./deploy/mk/db.mk migrate_down_sail
+db_migrate_up_sail:
+	@make -f ./deploy/mk/db.mk migrate_up_sail
 
 run_user_rpc:
 	@make -f ./deploy/mk/user_rpc.mk run-test

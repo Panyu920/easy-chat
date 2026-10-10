@@ -1,0 +1,12 @@
+DROP TABLE IF EXISTS `sail`.`publish_strategy`;
+DROP TABLE IF EXISTS `sail`.`publish_config`;
+DROP TABLE IF EXISTS `sail`.`publish`;
+DROP TABLE IF EXISTS `sail`.`config_history`;
+DROP TABLE IF EXISTS `sail`.`config_link`;
+DROP TABLE IF EXISTS `sail`.`config`;
+DROP TABLE IF EXISTS `sail`.`staff_group_rel`;
+DROP TABLE IF EXISTS `sail`.`namespace`;
+DROP TABLE IF EXISTS `sail`.`project`;
+DROP TABLE IF EXISTS `sail`.`project_group`;
+DROP TABLE IF EXISTS `sail`.`staff`;
+DROP SCHEMA IF EXISTS `sail`;

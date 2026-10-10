@@ -1,0 +1,11 @@
+host: 0.0.0.0
+jwtauth:
+    accessexpire: 86400
+    accesssecret: easy-chat
+name: user
+port: 29999
+userrpc:
+    etcd:
+        hosts:
+            - 192.168.1.5:3379
+        key: user.rpc

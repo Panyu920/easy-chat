@@ -18,6 +18,12 @@ services:
     volumes:
       - ./components/etcd/data:/etcd-data
     restart: unless-stopped
+    # healthcheck:
+    #   # test: ["CMD", "sh", "-c", "curl -sf http://localhost:2379/health"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 10s
     networks:
       easy-chat:
 

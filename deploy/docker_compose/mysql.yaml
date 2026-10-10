@@ -10,5 +10,11 @@ services:
       environment:
         MYSQL_ROOT_PASSWORD: easy-chat # 数据库密码
       restart: always
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+        start_period: 10s
       networks:
         easy-chat:

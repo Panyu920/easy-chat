@@ -1,0 +1,17 @@
+services:
+  sail:
+      image: ccr.ccs.tencentyun.com/hyy-yu/sail:latest
+      container_name: sail
+      ports:
+        - "8108:8108"
+      # 删除 working_dir: /app
+      volumes:
+        - "./components/sail/compose-cfg.toml:/app/cfg.toml:ro"
+        - "./components/sail/config/:/app/config/:ro"
+      depends_on:
+        etcd:
+          condition: service_started
+        mysql:
+          condition: service_healthy
+      networks:
+        - easy-chat
